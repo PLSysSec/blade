@@ -21,12 +21,14 @@ wasm_obj/%_ref.o: wasm_src/%.wasm $(LUCETC)
 wasm_obj/lib%_ref.a: wasm_obj/%_ref.o
 	$(AR) rcs $@ $<
 
-.PHONY: build
-build: wasm_obj/libtea_ref.a src
+target/debug/blade-benchmarks: wasm_obj/libtea_ref.a src
 	cargo build
 
+.PHONY: build
+build: target/debug/blade-benchmarks
+
 .PHONY: run
-run: build
+run: target/debug/blade-benchmarks
 	cargo run
 
 .PHONY: disasm
