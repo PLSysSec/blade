@@ -21,7 +21,7 @@ wasm_obj/%_ref.o: wasm_src/%.wasm $(LUCETC)
 wasm_obj/lib%_ref.a: wasm_obj/%_ref.o
 	$(AR) rcs $@ $<
 
-target/debug/blade-benchmarks: wasm_obj/libtea_ref.a src
+target/debug/blade-benchmarks: wasm_obj/libtea_ref.a wasm_obj/libsha256_ref.a src
 	cargo build
 
 .PHONY: build
@@ -31,8 +31,11 @@ build: target/debug/blade-benchmarks
 run: target/debug/blade-benchmarks
 	cargo run
 
-.PHONY: disasm
-disasm: wasm_obj/libtea_ref.a
+.PHONY: disasm_tea
+disasm_tea: wasm_obj/libtea_ref.a
+	objdump -SDg $< | less
+.PHONY: disasm_sha256
+disasm_sha256: wasm_obj/libsha256_ref.a
 	objdump -SDg $< | less
 
 .PHONY: clean

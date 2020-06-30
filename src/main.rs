@@ -1,3 +1,4 @@
+mod sha256;
 mod tea;
 
 fn main() {
@@ -5,6 +6,25 @@ fn main() {
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
     let encrypted = tea::encrypt(&message, &key);
     let decrypted = tea::decrypt(&encrypted, &key);
-    println!("Encryption of {} with key {} is {}", message, key, encrypted);
-    println!("Decryption of {} with key {} is {}", encrypted, key, decrypted);
+    println!("Tea encryption of {} with key {} is {}", message, key, encrypted);
+    println!("Tea decryption of {} with key {} is {}", encrypted, key, decrypted);
+
+    // test SHA-256 hash of empty string
+    let mut ctx = sha256::Context::new();
+    ctx.update(&[]);
+    let hash = ctx.finalize();
+    assert_eq!(&hash, &[0xe3, 0xb0, 0xc4, 0x42, 0x98, 0xfc, 0x1c, 0x14,
+                        0x9a, 0xfb, 0xf4, 0xc8, 0x99, 0x6f, 0xb9, 0x24,
+                        0x27, 0xae, 0x41, 0xe4, 0x64, 0x9b, 0x93, 0x4c,
+                        0xa4, 0x95, 0x99, 0x1b, 0x78, 0x52, 0xb8, 0x55]);
+
+    // test SHA-256 hash of non-empty string
+    let data = &[0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xf0, 0x0d];
+    let mut ctx = sha256::Context::new();
+    ctx.update(data);
+    let hash = ctx.finalize();
+    assert_eq!(&hash, &[0x09, 0xce, 0x09, 0x4e, 0x09, 0xa9, 0x52, 0x98,
+                        0x52, 0xde, 0x25, 0x18, 0x53, 0x71, 0x9a, 0xce,
+                        0x01, 0x3a, 0x83, 0xc9, 0x51, 0x2a, 0x90, 0x48,
+                        0x0c, 0x64, 0xdb, 0x28, 0x40, 0x96, 0x39, 0x14]);
 }
