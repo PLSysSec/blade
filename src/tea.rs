@@ -44,13 +44,13 @@ impl fmt::Display for TeaMsg {
     }
 }
 
-pub fn tea_encrypt(msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
+pub fn encrypt(msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
     let mut out = msg.clone();
     unsafe { guest_func_encrypt(out.msg.as_mut_ptr(), key.key.as_ptr()); }
     out
 }
 
-pub fn tea_decrypt(msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
+pub fn decrypt(msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
     let mut out = msg.clone();
     unsafe { guest_func_decrypt(out.msg.as_mut_ptr(), key.key.as_ptr()); }
     out
