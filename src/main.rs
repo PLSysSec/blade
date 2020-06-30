@@ -2,29 +2,51 @@ mod sha256;
 mod tea;
 
 fn main() {
+    let mut module = tea::TeaModule::new();
     let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
-    let encrypted = tea::encrypt(&message, &key);
-    let decrypted = tea::decrypt(&encrypted, &key);
+    let encrypted = module.encrypt(&message, &key);
+    let decrypted = module.decrypt(&encrypted, &key);
     println!("Tea encryption of {} with key {} is {}", message, key, encrypted);
     println!("Tea decryption of {} with key {} is {}", encrypted, key, decrypted);
 
-    // test SHA-256 hash of empty string
-    let mut ctx = sha256::Context::new();
-    ctx.update(&[]);
-    let hash = ctx.finalize();
-    assert_eq!(&hash, &[0xe3, 0xb0, 0xc4, 0x42, 0x98, 0xfc, 0x1c, 0x14,
-                        0x9a, 0xfb, 0xf4, 0xc8, 0x99, 0x6f, 0xb9, 0x24,
-                        0x27, 0xae, 0x41, 0xe4, 0x64, 0x9b, 0x93, 0x4c,
-                        0xa4, 0x95, 0x99, 0x1b, 0x78, 0x52, 0xb8, 0x55]);
-
-    // test SHA-256 hash of non-empty string
+    let mut module = sha256::SHA256Module::new();
+    module.init();
     let data = &[0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xf0, 0x0d];
-    let mut ctx = sha256::Context::new();
-    ctx.update(data);
-    let hash = ctx.finalize();
-    assert_eq!(&hash, &[0x09, 0xce, 0x09, 0x4e, 0x09, 0xa9, 0x52, 0x98,
-                        0x52, 0xde, 0x25, 0x18, 0x53, 0x71, 0x9a, 0xce,
-                        0x01, 0x3a, 0x83, 0xc9, 0x51, 0x2a, 0x90, 0x48,
-                        0x0c, 0x64, 0xdb, 0x28, 0x40, 0x96, 0x39, 0x14]);
+    module.update(data);
+    let hash = module.finalize();
+    assert_eq!(hash.as_u8_slice().len(), 32);
+    println!("SHA-256 hash of deadbeef_beeff00d is {}", hash);
+}
+
+#[test]
+fn tea() {
+    // test round-tripping with tea
+    let mut module = tea::TeaModule::new();
+    let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
+    let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
+    let encrypted = module.encrypt(&message, &key);
+    let decrypted = module.decrypt(&encrypted, &key);
+    assert_eq!(message, decrypted);
+}
+
+#[test]
+fn sha256() {
+    // test SHA-256 hash of 64 bytes of data
+    let mut module = sha256::SHA256Module::new();
+    module.init();
+    let data = &[
+        0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xf0, 0x0d,
+        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+        0x0f, 0xed, 0xcb, 0xa9, 0x87, 0x65, 0x43, 0x21,
+        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+        0x0f, 0xed, 0xcb, 0xa9, 0x87, 0x65, 0x43, 0x21,
+        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+        0x0f, 0xed, 0xcb, 0xa9, 0x87, 0x65, 0x43, 0x21,
+        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+    ];
+    assert_eq!(data.len(), 64);
+    module.update(data);
+    let hash = module.finalize();
+    assert_eq!(&hash.as_u8_slice(), &hmac_sha256::Hash::hash(data));
 }

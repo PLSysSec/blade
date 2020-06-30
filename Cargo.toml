@@ -7,6 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+lucet-runtime = { path = "../lucet/lucet-runtime" }
 
-[build-dependencies]
-bindgen = "0.54.0"
+[dev-dependencies]
+hmac-sha256 = "0.1.2"

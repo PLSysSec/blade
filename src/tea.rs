@@ -1,10 +1,6 @@
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
-
-include!(concat!(env!("OUT_DIR"), "/tea_bindings.rs"));
-
 use std::fmt;
+
+use lucet_runtime::{DlModule, InstanceHandle, Limits, MmapRegion, Region};
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TeaKey {
@@ -44,14 +40,56 @@ impl fmt::Display for TeaMsg {
     }
 }
 
-pub fn encrypt(msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
-    let mut out = msg.clone();
-    unsafe { guest_func_encrypt(out.msg.as_mut_ptr(), key.key.as_ptr()); }
-    out
+pub struct TeaModule {
+    so: InstanceHandle,
 }
 
-pub fn decrypt(msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
-    let mut out = msg.clone();
-    unsafe { guest_func_decrypt(out.msg.as_mut_ptr(), key.key.as_ptr()); }
-    out
+impl TeaModule {
+    pub fn new() -> Self {
+        Self {
+            so: {
+                let module = DlModule::load("wasm_obj/tea_ref.so").unwrap();
+                let region = MmapRegion::create(1, &Limits::default()).unwrap();
+                region.new_instance(module).unwrap()
+            }
+        }
+    }
+
+    pub fn encrypt(&mut self, msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
+        let heap = self.so.heap_u32_mut();
+        // the wasm function expects the msg as bytes 0-7 on the wasm heap, and key as bytes 8-23
+        heap[0] = msg.msg[0];
+        heap[1] = msg.msg[1];
+        heap[2] = key.key[0];
+        heap[3] = key.key[1];
+        heap[4] = key.key[2];
+        heap[5] = key.key[3];
+        let _ = self.so.run("encrypt", &[]).unwrap();
+        TeaMsg {
+            // the wasm function leaves the return values in bytes 0-7 of the heap
+            msg: {
+                let heap = self.so.heap_u32();
+                [heap[0], heap[1]]
+            }
+        }
+    }
+
+    pub fn decrypt(&mut self, msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
+        let heap = self.so.heap_u32_mut();
+        // the wasm function expects the msg as bytes 0-7 on the wasm heap, and key as bytes 8-23
+        heap[0] = msg.msg[0];
+        heap[1] = msg.msg[1];
+        heap[2] = key.key[0];
+        heap[3] = key.key[1];
+        heap[4] = key.key[2];
+        heap[5] = key.key[3];
+        let _ = self.so.run("decrypt", &[]).unwrap();
+        TeaMsg {
+            // the wasm function leaves the return values in bytes 0-7 of the heap
+            msg: {
+                let heap = self.so.heap_u32();
+                [heap[0], heap[1]]
+            }
+        }
+    }
 }
