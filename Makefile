@@ -29,6 +29,10 @@ build: wasm_obj/libtea_ref.a src
 run: build
 	cargo run
 
+.PHONY: disasm
+disasm: wasm_obj/libtea_ref.a
+	objdump -SDg $< | less
+
 .PHONY: clean
 clean:
 	cargo clean
