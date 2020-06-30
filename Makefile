@@ -1,21 +1,22 @@
-WASMTIME_REPO=../wasmtime
-WASMTIME=$(WASMTIME_REPO)/target/debug/wasmtime
-WAT2WASM=wat2wasm
+LUCET_REPO=../lucet
+LUCETC=$(LUCET_REPO)/target/debug/lucetc
+LUCETC_FLAGS=--emit=obj
+WAT2WASM=$(HOME)/wabt-1.0.15/wat2wasm
 AR=ar
 
 .DEFAULT_GOAL=build
 
 .PHONY: FORCE
 FORCE:
-$(WASMTIME): FORCE
-	cd $(WASMTIME_REPO) && cargo build
+$(LUCETC): FORCE
+	cd $(LUCET_REPO) && cargo build
 
 wasm_src/%.wasm: wasm_src/%.wat
 	$(WAT2WASM) $< -o $@
 
-wasm_obj/%_ref.o: wasm_src/%.wasm $(WASMTIME)
+wasm_obj/%_ref.o: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj
-	$(WASMTIME) wasm2obj $< $@
+	$(LUCETC) $(LUCETC_FLAGS) $< -o $@
 
 wasm_obj/lib%_ref.a: wasm_obj/%_ref.o
 	$(AR) rcs $@ $<
@@ -31,8 +32,8 @@ run: build
 .PHONY: clean
 clean:
 	cargo clean
-	-rm wasm_obj/*
+	-rm -rf wasm_obj
 
 .PHONY: fullclean
 fullclean: clean
-	cd $(WASMTIME_REPO) && cargo clean
+	cd $(LUCET_REPO) && cargo clean

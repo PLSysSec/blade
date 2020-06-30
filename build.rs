@@ -9,8 +9,8 @@ fn main() {
 
     let bindings = bindgen::Builder::default()
         .header("wasm_src/tea.h")
-        .whitelist_function("encrypt")
-        .whitelist_function("decrypt")
+        .whitelist_function("guest_func_encrypt")
+        .whitelist_function("guest_func_decrypt")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .expect("Unable to generate bindings for tea.h");
