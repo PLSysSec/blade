@@ -1,3 +1,5 @@
+use crate::blade_setting::BladeSetting;
+
 use std::fmt;
 
 use lucet_runtime::{DlModule, InstanceHandle, Limits, MmapRegion, Region};
@@ -7,10 +9,16 @@ pub struct SHA256Module {
 }
 
 impl SHA256Module {
-    pub fn new() -> Self {
+    pub fn new(blade_setting: BladeSetting) -> Self {
         Self {
             so: {
-                let module = DlModule::load("wasm_obj/sha256_ref.so").unwrap();
+                let soname = match blade_setting {
+                    BladeSetting::None => "wasm_obj/sha256_ref.so",
+                    BladeSetting::Lfence => "wasm_obj/sha256_lfence.so",
+                    BladeSetting::LfencePerBlock => "wasm_obj/sha256_lfence_per_block.so",
+                    BladeSetting::SLH => "wasm_obj/sha256_slh.so",
+                };
+                let module = DlModule::load(soname).unwrap();
                 let region = MmapRegion::create(1, &Limits::default()).unwrap();
                 region.new_instance(module).unwrap()
             }
