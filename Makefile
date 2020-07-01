@@ -32,6 +32,10 @@ run: target/debug/blade-benchmarks
 test: target/debug/blade-benchmarks
 	cargo test
 
+.PHONY: bench
+bench: target/debug/blade-benchmarks
+	cargo bench
+
 .PHONY: disasm_tea
 disasm_tea: wasm_obj/tea_ref.so
 	objdump -SDg $< | less

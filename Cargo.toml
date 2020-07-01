@@ -10,4 +10,9 @@ edition = "2018"
 lucet-runtime = { path = "../lucet/lucet-runtime" }
 
 [dev-dependencies]
+criterion = "0.3.3"
 hmac-sha256 = "0.1.2"
+
+[[bench]]
+name = "criterion_benches"
+harness = false
