@@ -1,9 +1,9 @@
-use blade_benchmarks::{sha256, tea, blade_setting::BladeSetting};
+use blade_benchmarks::{sha256, tea, blade_setting::BladeType};
 
 fn main() {
     lucet_runtime::lucet_internal_ensure_linked();
 
-    let mut module = tea::TeaModule::new(BladeSetting::None);
+    let mut module = tea::TeaModule::new(BladeType::None, false);
     let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
     let encrypted = module.encrypt(&message, &key);
@@ -11,7 +11,7 @@ fn main() {
     println!("Tea encryption of {} with key {} is {}", message, key, encrypted);
     println!("Tea decryption of {} with key {} is {}", encrypted, key, decrypted);
 
-    let mut module = sha256::SHA256Module::new(BladeSetting::None);
+    let mut module = sha256::SHA256Module::new(BladeType::None, false);
     module.init();
     let data = &[0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xf0, 0x0d];
     module.update(data);

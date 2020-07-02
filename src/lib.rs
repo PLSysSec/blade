@@ -5,7 +5,7 @@ pub mod tea;
 #[test]
 fn tea() {
     // test round-tripping with tea
-    let mut module = tea::TeaModule::new(blade_setting::BladeSetting::None);
+    let mut module = tea::TeaModule::new(blade_setting::BladeType::None, false);
     let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
     let encrypted = module.encrypt(&message, &key);
@@ -16,7 +16,7 @@ fn tea() {
 #[test]
 fn sha256() {
     // test SHA-256 hash of 64 bytes of data
-    let mut module = sha256::SHA256Module::new(blade_setting::BladeSetting::None);
+    let mut module = sha256::SHA256Module::new(blade_setting::BladeType::None, false);
     module.init();
     let data = &[
         0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xf0, 0x0d,

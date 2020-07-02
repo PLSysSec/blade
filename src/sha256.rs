@@ -1,4 +1,4 @@
-use crate::blade_setting::BladeSetting;
+use crate::blade_setting::BladeType;
 
 use std::fmt;
 
@@ -9,15 +9,17 @@ pub struct SHA256Module {
 }
 
 impl SHA256Module {
-    pub fn new(blade_setting: BladeSetting) -> Self {
+    pub fn new(blade_type: BladeType, blade_v1_1: bool) -> Self {
         Self {
             so: {
-                let soname = match blade_setting {
-                    BladeSetting::None => "wasm_obj/sha256_ref.so",
-                    BladeSetting::Lfence => "wasm_obj/sha256_lfence.so",
-                    BladeSetting::LfencePerBlock => "wasm_obj/sha256_lfence_per_block.so",
-                    BladeSetting::SLHWith11 => "wasm_obj/sha256_slh_with_1_1.so",
-                    BladeSetting::SLHNo11 => "wasm_obj/sha256_slh_no_1_1.so",
+                let soname = match (blade_type, blade_v1_1) {
+                    (BladeType::None, _) => "wasm_obj/sha256_ref.so",
+                    (BladeType::Lfence, true) => "wasm_obj/sha256_lfence_with_v1_1.so",
+                    (BladeType::Lfence, false) => "wasm_obj/sha256_lfence_no_v1_1.so",
+                    (BladeType::LfencePerBlock, true) => "wasm_obj/sha256_lfence_per_block_with_v1_1.so",
+                    (BladeType::LfencePerBlock, false) => "wasm_obj/sha256_lfence_per_block_no_v1_1.so",
+                    (BladeType::SLH, true) => "wasm_obj/sha256_slh_with_v1_1.so",
+                    (BladeType::SLH, false) => "wasm_obj/sha256_slh_no_v1_1.so",
                 };
                 let module = DlModule::load(soname).unwrap();
                 let region = MmapRegion::create(1, &Limits::default()).unwrap();
