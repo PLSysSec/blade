@@ -54,7 +54,8 @@ impl TeaModule {
                     BladeSetting::None => "wasm_obj/tea_ref.so",
                     BladeSetting::Lfence => "wasm_obj/tea_lfence.so",
                     BladeSetting::LfencePerBlock => "wasm_obj/tea_lfence_per_block.so",
-                    BladeSetting::SLH => "wasm_obj/tea_slh.so",
+                    BladeSetting::SLHWith11 => "wasm_obj/tea_slh_with_1_1.so",
+                    BladeSetting::SLHNo11 => "wasm_obj/tea_slh_no_1_1.so"
                 };
                 let module = DlModule::load(soname).unwrap();
                 let region = MmapRegion::create(1, &Limits::default()).unwrap();

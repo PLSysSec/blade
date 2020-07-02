@@ -26,15 +26,20 @@ wasm_obj/%_lfence_per_block.so: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj
 	$(LUCETC) $(LUCETC_FLAGS) --blade=lfence_per_block $< -o $@
 
-wasm_obj/%_slh.so: wasm_src/%.wasm $(LUCETC)
+wasm_obj/%_slh_no_1_1.so: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj
-	$(LUCETC) $(LUCETC_FLAGS) --blade=slh $< -o $@
+	$(LUCETC) $(LUCETC_FLAGS) --blade=slh_no_1_1 $< -o $@
+
+wasm_obj/%_slh_with_1_1.so: wasm_src/%.wasm $(LUCETC)
+	mkdir -p wasm_obj
+	$(LUCETC) $(LUCETC_FLAGS) --blade=slh_with_1_1 $< -o $@
 
 target/debug/blade-benchmarks: \
 		wasm_obj/tea_ref.so wasm_obj/sha256_ref.so \
 		wasm_obj/tea_lfence.so wasm_obj/sha256_lfence.so \
 		wasm_obj/tea_lfence_per_block.so wasm_obj/sha256_lfence_per_block.so \
-		wasm_obj/tea_slh.so wasm_obj/sha256_slh.so \
+		wasm_obj/tea_slh_no_1_1.so wasm_obj/sha256_slh_no_1_1.so \
+		wasm_obj/tea_slh_with_1_1.so wasm_obj/sha256_slh_with_1_1.so \
 		src
 	cargo build
 

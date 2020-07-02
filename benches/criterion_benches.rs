@@ -7,7 +7,8 @@ pub fn tea_encrypt(c: &mut Criterion) {
     let mut module_ref = tea::TeaModule::new(BladeSetting::None);
     let mut module_lfence = tea::TeaModule::new(BladeSetting::Lfence);
     //let mut module_lfence_per_block = tea::TeaModule::new(BladeSetting::LfencePerBlock);
-    let mut module_slh = tea::TeaModule::new(BladeSetting::SLH);
+    let mut module_slh_with_1_1 = tea::TeaModule::new(BladeSetting::SLHWith11);
+    let mut module_slh_no_1_1 = tea::TeaModule::new(BladeSetting::SLHNo11);
     let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
 
@@ -23,8 +24,11 @@ pub fn tea_encrypt(c: &mut Criterion) {
         module_lfence_per_block.encrypt(black_box(&message), black_box(&key));
     }));
     */
-    group.bench_function("SLH", |b| b.iter(|| {
-        module_slh.encrypt(black_box(&message), black_box(&key));
+    group.bench_function("SLH with 1.1", |b| b.iter(|| {
+        module_slh_with_1_1.encrypt(black_box(&message), black_box(&key));
+    }));
+    group.bench_function("SLH no 1.1", |b| b.iter(|| {
+        module_slh_no_1_1.encrypt(black_box(&message), black_box(&key));
     }));
 }
 
@@ -34,7 +38,8 @@ pub fn tea_decrypt(c: &mut Criterion) {
     let mut module_ref = tea::TeaModule::new(BladeSetting::None);
     let mut module_lfence = tea::TeaModule::new(BladeSetting::Lfence);
     //let mut module_lfence_per_block = tea::TeaModule::new(BladeSetting::LfencePerBlock);
-    let mut module_slh = tea::TeaModule::new(BladeSetting::SLH);
+    let mut module_slh_with_1_1 = tea::TeaModule::new(BladeSetting::SLHWith11);
+    let mut module_slh_no_1_1 = tea::TeaModule::new(BladeSetting::SLHNo11);
     let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
 
@@ -50,8 +55,11 @@ pub fn tea_decrypt(c: &mut Criterion) {
         module_lfence_per_block.decrypt(black_box(&message), black_box(&key));
     }));
     */
-    group.bench_function("SLH", |b| b.iter(|| {
-        module_slh.decrypt(black_box(&message), black_box(&key));
+    group.bench_function("SLH with 1.1", |b| b.iter(|| {
+        module_slh_with_1_1.encrypt(black_box(&message), black_box(&key));
+    }));
+    group.bench_function("SLH no 1.1", |b| b.iter(|| {
+        module_slh_no_1_1.encrypt(black_box(&message), black_box(&key));
     }));
 }
 
@@ -61,7 +69,8 @@ pub fn sha256_of_64bytes(c: &mut Criterion) {
     let mut module_ref = sha256::SHA256Module::new(BladeSetting::None);
     let mut module_lfence = sha256::SHA256Module::new(BladeSetting::Lfence);
     //let mut module_lfence_per_block = sha256::SHA256Module::new(BladeSetting::LfencePerBlock);
-    let mut module_slh = sha256::SHA256Module::new(BladeSetting::SLH);
+    let mut module_slh_with_1_1 = sha256::SHA256Module::new(BladeSetting::SLHWith11);
+    let mut module_slh_no_1_1 = sha256::SHA256Module::new(BladeSetting::SLHNo11);
     let data = &[
         0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xf0, 0x0d,
         0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
@@ -91,10 +100,15 @@ pub fn sha256_of_64bytes(c: &mut Criterion) {
         module_lfence_per_block.finalize();
     }));
     */
-    group.bench_function("SLH", |b| b.iter(|| {
-        module_slh.init();
-        module_slh.update(data);
-        module_slh.finalize();
+    group.bench_function("SLH with 1.1", |b| b.iter(|| {
+        module_slh_with_1_1.init();
+        module_slh_with_1_1.update(data);
+        module_slh_with_1_1.finalize();
+    }));
+    group.bench_function("SLH no 1.1", |b| b.iter(|| {
+        module_slh_no_1_1.init();
+        module_slh_no_1_1.update(data);
+        module_slh_no_1_1.finalize();
     }));
 }
 
@@ -104,7 +118,8 @@ pub fn sha256_of_1024bytes(c: &mut Criterion) {
     let mut module_ref = sha256::SHA256Module::new(BladeSetting::None);
     let mut module_lfence = sha256::SHA256Module::new(BladeSetting::Lfence);
     //let mut module_lfence_per_block = sha256::SHA256Module::new(BladeSetting::LfencePerBlock);
-    let mut module_slh = sha256::SHA256Module::new(BladeSetting::SLH);
+    let mut module_slh_with_1_1 = sha256::SHA256Module::new(BladeSetting::SLHWith11);
+    let mut module_slh_no_1_1 = sha256::SHA256Module::new(BladeSetting::SLHNo11);
     let data = {
         let mut data = vec![];
         for i in 0 .. 128 {
@@ -138,10 +153,15 @@ pub fn sha256_of_1024bytes(c: &mut Criterion) {
         module_lfence_per_block.finalize();
     }));
     */
-    group.bench_function("SLH", |b| b.iter(|| {
-        module_slh.init();
-        module_slh.update(&data);
-        module_slh.finalize();
+    group.bench_function("SLH with 1.1", |b| b.iter(|| {
+        module_slh_with_1_1.init();
+        module_slh_with_1_1.update(&data);
+        module_slh_with_1_1.finalize();
+    }));
+    group.bench_function("SLH no 1.1", |b| b.iter(|| {
+        module_slh_no_1_1.init();
+        module_slh_no_1_1.update(&data);
+        module_slh_no_1_1.finalize();
     }));
 }
 
