@@ -3,6 +3,8 @@ pub mod salsa20;
 pub mod sha256;
 pub mod tea;
 
+mod module;
+
 #[test]
 fn tea() {
     // test round-tripping with tea
