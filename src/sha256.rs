@@ -14,6 +14,8 @@ impl SHA256Module {
             so: {
                 let soname = match (blade_type, blade_v1_1) {
                     (BladeType::None, _) => "wasm_obj/sha256_ref.so",
+                    (BladeType::Baseline, true) => "wasm_obj/sha256_baseline_with_v1_1.so",
+                    (BladeType::Baseline, false) => "wasm_obj/sha256_baseline_no_v1_1.so",
                     (BladeType::Lfence, true) => "wasm_obj/sha256_lfence_with_v1_1.so",
                     (BladeType::Lfence, false) => "wasm_obj/sha256_lfence_no_v1_1.so",
                     (BladeType::LfencePerBlock, true) => "wasm_obj/sha256_lfence_per_block_with_v1_1.so",

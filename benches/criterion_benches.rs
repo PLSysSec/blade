@@ -3,6 +3,8 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 struct TeaModules {
     reference: tea::TeaModule,
+    baseline_with_v1_1: tea::TeaModule,
+    baseline_no_v1_1: tea::TeaModule,
     lfence_with_v1_1: tea::TeaModule,
     lfence_no_v1_1: tea::TeaModule,
     //lfence_per_block_with_v1_1: tea::TeaModule,
@@ -15,6 +17,8 @@ impl TeaModules {
     fn new() -> Self {
         Self {
             reference: tea::TeaModule::new(BladeType::None, false),
+            baseline_with_v1_1: tea::TeaModule::new(BladeType::Baseline, true),
+            baseline_no_v1_1: tea::TeaModule::new(BladeType::Baseline, false),
             lfence_with_v1_1: tea::TeaModule::new(BladeType::Lfence, true),
             lfence_no_v1_1: tea::TeaModule::new(BladeType::Lfence, false),
             //lfence_per_block_with_v1_1: tea::TeaModule::new(BladeType::LfencePerBlock, true),
@@ -27,6 +31,8 @@ impl TeaModules {
 
 struct SHA256Modules {
     reference: sha256::SHA256Module,
+    baseline_with_v1_1: sha256::SHA256Module,
+    baseline_no_v1_1: sha256::SHA256Module,
     lfence_with_v1_1: sha256::SHA256Module,
     lfence_no_v1_1: sha256::SHA256Module,
     //lfence_per_block_with_v1_1: sha256::SHA256Module,
@@ -39,6 +45,8 @@ impl SHA256Modules {
     fn new() -> Self {
         Self {
             reference: sha256::SHA256Module::new(BladeType::None, false),
+            baseline_with_v1_1: sha256::SHA256Module::new(BladeType::Baseline, true),
+            baseline_no_v1_1: sha256::SHA256Module::new(BladeType::Baseline, false),
             lfence_with_v1_1: sha256::SHA256Module::new(BladeType::Lfence, true),
             lfence_no_v1_1: sha256::SHA256Module::new(BladeType::Lfence, false),
             //lfence_per_block_with_v1_1: sha256::SHA256Module::new(BladeType::LfencePerBlock, true),
@@ -59,6 +67,12 @@ pub fn tea_encrypt(c: &mut Criterion) {
     let mut group = c.benchmark_group("tea encrypt");
     group.bench_function("Ref", |b| b.iter(|| {
         modules.reference.encrypt(black_box(&message), black_box(&key));
+    }));
+    group.bench_function("Baseline with v1.1", |b| b.iter(|| {
+        modules.baseline_with_v1_1.encrypt(black_box(&message), black_box(&key));
+    }));
+    group.bench_function("Baseline no v1.1", |b| b.iter(|| {
+        modules.baseline_no_v1_1.encrypt(black_box(&message), black_box(&key));
     }));
     group.bench_function("Lfence with v1.1", |b| b.iter(|| {
         modules.lfence_with_v1_1.encrypt(black_box(&message), black_box(&key));
@@ -92,6 +106,12 @@ pub fn tea_decrypt(c: &mut Criterion) {
     let mut group = c.benchmark_group("tea decrypt");
     group.bench_function("Ref", |b| b.iter(|| {
         modules.reference.decrypt(black_box(&message), black_box(&key));
+    }));
+    group.bench_function("Baseline with v1.1", |b| b.iter(|| {
+        modules.baseline_with_v1_1.decrypt(black_box(&message), black_box(&key));
+    }));
+    group.bench_function("Baseline no v1.1", |b| b.iter(|| {
+        modules.baseline_no_v1_1.decrypt(black_box(&message), black_box(&key));
     }));
     group.bench_function("Lfence with v1.1", |b| b.iter(|| {
         modules.lfence_with_v1_1.decrypt(black_box(&message), black_box(&key));
@@ -135,6 +155,16 @@ pub fn sha256_of_64bytes(c: &mut Criterion) {
         modules.reference.init();
         modules.reference.update(data);
         modules.reference.finalize();
+    }));
+    group.bench_function("Baseline with v1.1", |b| b.iter(|| {
+        modules.baseline_with_v1_1.init();
+        modules.baseline_with_v1_1.update(data);
+        modules.baseline_with_v1_1.finalize();
+    }));
+    group.bench_function("Baseline no v1.1", |b| b.iter(|| {
+        modules.baseline_no_v1_1.init();
+        modules.baseline_no_v1_1.update(data);
+        modules.baseline_no_v1_1.finalize();
     }));
     group.bench_function("Lfence with v1.1", |b| b.iter(|| {
         modules.lfence_with_v1_1.init();
@@ -194,6 +224,16 @@ pub fn sha256_of_1024bytes(c: &mut Criterion) {
         modules.reference.init();
         modules.reference.update(&data);
         modules.reference.finalize();
+    }));
+    group.bench_function("Baseline with v1.1", |b| b.iter(|| {
+        modules.baseline_with_v1_1.init();
+        modules.baseline_with_v1_1.update(&data);
+        modules.baseline_with_v1_1.finalize();
+    }));
+    group.bench_function("Baseline no v1.1", |b| b.iter(|| {
+        modules.baseline_no_v1_1.init();
+        modules.baseline_no_v1_1.update(&data);
+        modules.baseline_no_v1_1.finalize();
     }));
     group.bench_function("Lfence with v1.1", |b| b.iter(|| {
         modules.lfence_with_v1_1.init();
