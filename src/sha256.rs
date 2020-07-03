@@ -1,5 +1,5 @@
 use crate::blade_setting::BladeType;
-use crate::module::get_lucet_module;
+use crate::module::{get_lucet_module, BladeModule};
 
 use std::fmt;
 
@@ -9,13 +9,15 @@ pub struct SHA256Module {
     so: InstanceHandle,
 }
 
-impl SHA256Module {
-    pub fn new(blade_type: BladeType, blade_v1_1: bool) -> Self {
+impl BladeModule for SHA256Module {
+    fn new(blade_type: BladeType, blade_v1_1: bool) -> Self {
         Self {
             so: get_lucet_module("wasm_obj/sha256", blade_type, blade_v1_1),
         }
     }
+}
 
+impl SHA256Module {
     /// Call this before starting, or call this to "refresh" the state to prepare
     /// for a new hash
     pub fn init(&mut self) {

@@ -4,6 +4,7 @@ pub mod sha256;
 pub mod tea;
 
 mod module;
+pub use module::BladeModule;
 
 #[test]
 fn tea() {

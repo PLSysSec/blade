@@ -1,86 +1,30 @@
-use blade_benchmarks::{salsa20, sha256, tea, blade_setting::BladeType};
+use blade_benchmarks::{salsa20, sha256, tea, blade_setting::BladeType, BladeModule};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-struct TeaModules {
-    reference: tea::TeaModule,
-    baseline_with_v1_1: tea::TeaModule,
-    baseline_no_v1_1: tea::TeaModule,
-    lfence_with_v1_1: tea::TeaModule,
-    lfence_no_v1_1: tea::TeaModule,
-    //lfence_per_block_with_v1_1: tea::TeaModule,
-    //lfence_per_block_no_v1_1: tea::TeaModule,
-    slh_with_v1_1: tea::TeaModule,
-    slh_no_v1_1: tea::TeaModule,
+struct Modules<T> {
+    reference: T,
+    baseline_with_v1_1: T,
+    baseline_no_v1_1: T,
+    lfence_with_v1_1: T,
+    lfence_no_v1_1: T,
+    //lfence_per_block_with_v1_1: T,
+    //lfence_per_block_no_v1_1: T,
+    slh_with_v1_1: T,
+    slh_no_v1_1: T,
 }
 
-impl TeaModules {
+impl<T: BladeModule> Modules<T> {
     fn new() -> Self {
         Self {
-            reference: tea::TeaModule::new(BladeType::None, false),
-            baseline_with_v1_1: tea::TeaModule::new(BladeType::Baseline, true),
-            baseline_no_v1_1: tea::TeaModule::new(BladeType::Baseline, false),
-            lfence_with_v1_1: tea::TeaModule::new(BladeType::Lfence, true),
-            lfence_no_v1_1: tea::TeaModule::new(BladeType::Lfence, false),
-            //lfence_per_block_with_v1_1: tea::TeaModule::new(BladeType::LfencePerBlock, true),
-            //lfence_per_block_no_v1_1: tea::TeaModule::new(BladeType::LfencePerBlock, false),
-            slh_with_v1_1: tea::TeaModule::new(BladeType::SLH, true),
-            slh_no_v1_1: tea::TeaModule::new(BladeType::SLH, false),
-        }
-    }
-}
-
-struct SHA256Modules {
-    reference: sha256::SHA256Module,
-    baseline_with_v1_1: sha256::SHA256Module,
-    baseline_no_v1_1: sha256::SHA256Module,
-    lfence_with_v1_1: sha256::SHA256Module,
-    lfence_no_v1_1: sha256::SHA256Module,
-    //lfence_per_block_with_v1_1: sha256::SHA256Module,
-    //lfence_per_block_no_v1_1: sha256::SHA256Module,
-    slh_with_v1_1: sha256::SHA256Module,
-    slh_no_v1_1: sha256::SHA256Module,
-}
-
-impl SHA256Modules {
-    fn new() -> Self {
-        Self {
-            reference: sha256::SHA256Module::new(BladeType::None, false),
-            baseline_with_v1_1: sha256::SHA256Module::new(BladeType::Baseline, true),
-            baseline_no_v1_1: sha256::SHA256Module::new(BladeType::Baseline, false),
-            lfence_with_v1_1: sha256::SHA256Module::new(BladeType::Lfence, true),
-            lfence_no_v1_1: sha256::SHA256Module::new(BladeType::Lfence, false),
-            //lfence_per_block_with_v1_1: sha256::SHA256Module::new(BladeType::LfencePerBlock, true),
-            //lfence_per_block_no_v1_1: sha256::SHA256Module::new(BladeType::LfencePerBlock, false),
-            slh_with_v1_1: sha256::SHA256Module::new(BladeType::SLH, true),
-            slh_no_v1_1: sha256::SHA256Module::new(BladeType::SLH, false),
-        }
-    }
-}
-
-struct Salsa20Modules {
-    reference: salsa20::Salsa20Module,
-    baseline_with_v1_1: salsa20::Salsa20Module,
-    baseline_no_v1_1: salsa20::Salsa20Module,
-    lfence_with_v1_1: salsa20::Salsa20Module,
-    lfence_no_v1_1: salsa20::Salsa20Module,
-    //lfence_per_block_with_v1_1: salsa20::Salsa20Module,
-    //lfence_per_block_no_v1_1: salsa20::Salsa20Module,
-    slh_with_v1_1: salsa20::Salsa20Module,
-    slh_no_v1_1: salsa20::Salsa20Module,
-}
-
-impl Salsa20Modules {
-    fn new() -> Self {
-        Self {
-            reference: salsa20::Salsa20Module::new(BladeType::None, false),
-            baseline_with_v1_1: salsa20::Salsa20Module::new(BladeType::Baseline, true),
-            baseline_no_v1_1: salsa20::Salsa20Module::new(BladeType::Baseline, false),
-            lfence_with_v1_1: salsa20::Salsa20Module::new(BladeType::Lfence, true),
-            lfence_no_v1_1: salsa20::Salsa20Module::new(BladeType::Lfence, false),
-            //lfence_per_block_with_v1_1: salsa20::Salsa20Module::new(BladeType::LfencePerBlock, true),
-            //lfence_per_block_no_v1_1: salsa20::Salsa20Module::new(BladeType::LfencePerBlock, false),
-            slh_with_v1_1: salsa20::Salsa20Module::new(BladeType::SLH, true),
-            slh_no_v1_1: salsa20::Salsa20Module::new(BladeType::SLH, false),
+            reference: T::new(BladeType::None, false),
+            baseline_with_v1_1: T::new(BladeType::Baseline, true),
+            baseline_no_v1_1: T::new(BladeType::Baseline, false),
+            lfence_with_v1_1: T::new(BladeType::Lfence, true),
+            lfence_no_v1_1: T::new(BladeType::Lfence, false),
+            //lfence_per_block_with_v1_1: T::new(BladeType::LfencePerBlock, true),
+            //lfence_per_block_no_v1_1: T::new(BladeType::LfencePerBlock, false),
+            slh_with_v1_1: T::new(BladeType::SLH, true),
+            slh_no_v1_1: T::new(BladeType::SLH, false),
         }
     }
 }
@@ -88,7 +32,7 @@ impl Salsa20Modules {
 pub fn tea_encrypt(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
-    let mut modules = TeaModules::new();
+    let mut modules = Modules::<tea::TeaModule>::new();
     let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
 
@@ -127,7 +71,7 @@ pub fn tea_encrypt(c: &mut Criterion) {
 pub fn tea_decrypt(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
-    let mut modules = TeaModules::new();
+    let mut modules = Modules::<tea::TeaModule>::new();
     let message = tea::TeaMsg::new([0xdeadbeef, 0xbeeff00d]);
     let key = tea::TeaKey::new([0xd34db33f, 0xb33ff33d, 0xf000ba12, 0xdeadf00d]);
 
@@ -166,7 +110,7 @@ pub fn tea_decrypt(c: &mut Criterion) {
 pub fn sha256_of_64bytes(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
-    let mut modules = SHA256Modules::new();
+    let mut modules = Modules::<sha256::SHA256Module>::new();
     let data = &[
         0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef, 0xf0, 0x0d,
         0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
@@ -231,7 +175,7 @@ pub fn sha256_of_64bytes(c: &mut Criterion) {
 pub fn sha256_of_1024bytes(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
-    let mut modules = SHA256Modules::new();
+    let mut modules = Modules::<sha256::SHA256Module>::new();
     let data = {
         let mut data = vec![];
         for i in 0 .. 128 {
@@ -300,7 +244,7 @@ pub fn sha256_of_1024bytes(c: &mut Criterion) {
 pub fn salsa20_run(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
-    let mut modules = Salsa20Modules::new();
+    let mut modules = Modules::<salsa20::Salsa20Module>::new();
     let mut group = c.benchmark_group("salsa20");
     group.bench_function("Ref", |b| b.iter(|| {
         modules.reference.run();

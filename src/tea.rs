@@ -1,5 +1,5 @@
 use crate::blade_setting::BladeType;
-use crate::module::get_lucet_module;
+use crate::module::{get_lucet_module, BladeModule};
 
 use std::fmt;
 
@@ -47,13 +47,15 @@ pub struct TeaModule {
     so: InstanceHandle,
 }
 
-impl TeaModule {
-    pub fn new(blade_type: BladeType, blade_v1_1: bool) -> Self {
+impl BladeModule for TeaModule {
+    fn new(blade_type: BladeType, blade_v1_1: bool) -> Self {
         Self {
             so: get_lucet_module("wasm_obj/tea", blade_type, blade_v1_1),
         }
     }
+}
 
+impl TeaModule {
     pub fn encrypt(&mut self, msg: &TeaMsg, key: &TeaKey) -> TeaMsg {
         let heap = self.so.heap_u32_mut();
         // the wasm function expects the msg as bytes 0-7 on the wasm heap, and key as bytes 8-23

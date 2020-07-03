@@ -1,4 +1,4 @@
-use blade_benchmarks::{sha256, tea, blade_setting::BladeType};
+use blade_benchmarks::{sha256, tea, blade_setting::BladeType, BladeModule};
 
 fn main() {
     lucet_runtime::lucet_internal_ensure_linked();
