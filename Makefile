@@ -51,7 +51,7 @@ wasm_obj/%_slh_no_v1_1.so: wasm_src/%.wasm $(LUCETC)
 	$(LUCETC) $(LUCETC_FLAGS) --blade-type=slh $< -o $@
 
 .PHONY: all_sos
-all_sos: tea_sos sha256_sos
+all_sos: tea_sos sha256_sos salsa20_sos
 
 .PHONY: tea_sos
 tea_sos: \
@@ -76,6 +76,18 @@ sha256_sos: \
 	wasm_obj/sha256_lfence_per_block_no_v1_1.so \
 	wasm_obj/sha256_slh_with_v1_1.so \
 	wasm_obj/sha256_slh_no_v1_1.so \
+
+.PHONY: salsa20_sos
+salsa20_sos: \
+	wasm_obj/salsa20_ref.so \
+	wasm_obj/salsa20_baseline_with_v1_1.so \
+	wasm_obj/salsa20_baseline_no_v1_1.so \
+	wasm_obj/salsa20_lfence_with_v1_1.so \
+	wasm_obj/salsa20_lfence_no_v1_1.so \
+	wasm_obj/salsa20_lfence_per_block_with_v1_1.so \
+	wasm_obj/salsa20_lfence_per_block_no_v1_1.so \
+	wasm_obj/salsa20_slh_with_v1_1.so \
+	wasm_obj/salsa20_slh_no_v1_1.so \
 
 target/debug/blade-benchmarks: all_sos src
 	cargo build

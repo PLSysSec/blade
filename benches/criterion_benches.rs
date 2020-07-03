@@ -1,4 +1,4 @@
-use blade_benchmarks::{sha256, tea, blade_setting::BladeType};
+use blade_benchmarks::{salsa20, sha256, tea, blade_setting::BladeType};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 struct TeaModules {
@@ -53,6 +53,34 @@ impl SHA256Modules {
             //lfence_per_block_no_v1_1: sha256::SHA256Module::new(BladeType::LfencePerBlock, false),
             slh_with_v1_1: sha256::SHA256Module::new(BladeType::SLH, true),
             slh_no_v1_1: sha256::SHA256Module::new(BladeType::SLH, false),
+        }
+    }
+}
+
+struct Salsa20Modules {
+    reference: salsa20::Salsa20Module,
+    baseline_with_v1_1: salsa20::Salsa20Module,
+    baseline_no_v1_1: salsa20::Salsa20Module,
+    lfence_with_v1_1: salsa20::Salsa20Module,
+    lfence_no_v1_1: salsa20::Salsa20Module,
+    //lfence_per_block_with_v1_1: salsa20::Salsa20Module,
+    //lfence_per_block_no_v1_1: salsa20::Salsa20Module,
+    slh_with_v1_1: salsa20::Salsa20Module,
+    slh_no_v1_1: salsa20::Salsa20Module,
+}
+
+impl Salsa20Modules {
+    fn new() -> Self {
+        Self {
+            reference: salsa20::Salsa20Module::new(BladeType::None, false),
+            baseline_with_v1_1: salsa20::Salsa20Module::new(BladeType::Baseline, true),
+            baseline_no_v1_1: salsa20::Salsa20Module::new(BladeType::Baseline, false),
+            lfence_with_v1_1: salsa20::Salsa20Module::new(BladeType::Lfence, true),
+            lfence_no_v1_1: salsa20::Salsa20Module::new(BladeType::Lfence, false),
+            //lfence_per_block_with_v1_1: salsa20::Salsa20Module::new(BladeType::LfencePerBlock, true),
+            //lfence_per_block_no_v1_1: salsa20::Salsa20Module::new(BladeType::LfencePerBlock, false),
+            slh_with_v1_1: salsa20::Salsa20Module::new(BladeType::SLH, true),
+            slh_no_v1_1: salsa20::Salsa20Module::new(BladeType::SLH, false),
         }
     }
 }
@@ -269,6 +297,43 @@ pub fn sha256_of_1024bytes(c: &mut Criterion) {
     }));
 }
 
+pub fn salsa20_run(c: &mut Criterion) {
+    lucet_runtime::lucet_internal_ensure_linked();
+
+    let mut modules = Salsa20Modules::new();
+    let mut group = c.benchmark_group("salsa20");
+    group.bench_function("Ref", |b| b.iter(|| {
+        modules.reference.run();
+    }));
+    group.bench_function("Baseline with v1.1", |b| b.iter(|| {
+        modules.baseline_with_v1_1.run();
+    }));
+    group.bench_function("Baseline no v1.1", |b| b.iter(|| {
+        modules.baseline_no_v1_1.run();
+    }));
+    group.bench_function("Lfence with v1.1", |b| b.iter(|| {
+        modules.lfence_with_v1_1.run();
+    }));
+    group.bench_function("Lfence no v1.1", |b| b.iter(|| {
+        modules.lfence_no_v1_1.run();
+    }));
+    /*
+    group.bench_function("LfencePerBlock with v1.1", |b| b.iter(|| {
+        modules.lfence_per_block_with_v1_1.run();
+    }));
+    group.bench_function("LfencePerBlock no v1.1", |b| b.iter(|| {
+        modules.lfence_per_block_no_v1_1.run();
+    }));
+    */
+    group.bench_function("SLH with v1.1", |b| b.iter(|| {
+        modules.slh_with_v1_1.run();
+    }));
+    group.bench_function("SLH no v1.1", |b| b.iter(|| {
+        modules.slh_no_v1_1.run();
+    }));
+}
+
 criterion_group!(tea, tea_encrypt, tea_decrypt);
 criterion_group!(sha256, sha256_of_64bytes, sha256_of_1024bytes);
-criterion_main!(tea, sha256);
+criterion_group!(salsa20, salsa20_run);
+criterion_main!(tea, sha256, salsa20);
