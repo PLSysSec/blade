@@ -1,4 +1,4 @@
-use blade_benchmarks::{salsa20, sha256, tea, blade_setting::BladeType, BladeModule};
+use blade_benchmarks::{hacl_poly1305_32, salsa20, sha256, tea, blade_setting::BladeType, BladeModule};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 struct Modules<T> {
@@ -113,20 +113,7 @@ pub fn sha256_of_1024bytes(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
     let mut modules = Modules::<sha256::SHA256Module>::new();
-    let data = {
-        let mut data = vec![];
-        for i in 0 .. 128 {
-            data.push(0xfa - i);
-            data.push(0xce - i);
-            data.push(0x1f + i);
-            data.push(0x31 + i);
-            data.push(0x78 + (i/2));
-            data.push(0x04 + (3*i/2));
-            data.push(0xaa - (i/2));
-            data.push(0x32 + i);
-        }
-        data
-    };
+    let data = get_some_bytes(1024);
 
     modules.bench_all(c, "sha256 of 1024 bytes", |m| {
         m.init();
@@ -144,7 +131,64 @@ pub fn salsa20_run(c: &mut Criterion) {
     });
 }
 
+pub fn poly1305_mac_of_1024bytes(c: &mut Criterion) {
+    lucet_runtime::lucet_internal_ensure_linked();
+
+    let mut modules = Modules::<hacl_poly1305_32::Poly1305Module>::new();
+    let key = hacl_poly1305_32::Poly1305Key::new(
+        [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+    );
+    let msg = get_some_bytes(1024);
+    modules.bench_all(c, "poly1305", |m| {
+        m.mac(&key, &msg);
+    })
+}
+
+pub fn poly1305_mac_of_8192bytes(c: &mut Criterion) {
+    lucet_runtime::lucet_internal_ensure_linked();
+
+    let mut modules = Modules::<hacl_poly1305_32::Poly1305Module>::new();
+    let key = hacl_poly1305_32::Poly1305Key::new(
+        [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+    );
+    let msg = get_some_bytes(8192);
+    modules.bench_all(c, "poly1305", |m| {
+        m.mac(&key, &msg);
+    })
+}
+
+pub fn get_some_bytes(howmany: usize) -> Vec<u8> {
+    let mut data = Vec::with_capacity(howmany);
+    assert_eq!(howmany % 8, 0, "this function expects a multiple of 8 bytes");
+    let full_1024s = howmany / 1024;
+    let leftover_bytes = howmany % 1024;
+    for _ in 0 .. full_1024s {
+        for i in 0 .. 128 {
+            data.push(0xfa - i);
+            data.push(0xce - i);
+            data.push(0x1f + i);
+            data.push(0x31 + i);
+            data.push(0x78 + (i/2));
+            data.push(0x04 + (3*i/2));
+            data.push(0xaa - (i/2));
+            data.push(0x32 + i);
+        }
+    }
+    for i in 0 .. (leftover_bytes/8) as u8 {
+        data.push(0xfa - i);
+        data.push(0xce - i);
+        data.push(0x1f + i);
+        data.push(0x31 + i);
+        data.push(0x78 + (i/2));
+        data.push(0x04 + (3*i/2));
+        data.push(0xaa - (i/2));
+        data.push(0x32 + i);
+    }
+    data
+}
+
 criterion_group!(tea, tea_encrypt, tea_decrypt);
 criterion_group!(sha256, sha256_of_64bytes, sha256_of_1024bytes);
 criterion_group!(salsa20, salsa20_run);
-criterion_main!(tea, sha256, salsa20);
+criterion_group!(poly1305, poly1305_mac_of_1024bytes, poly1305_mac_of_8192bytes);
+criterion_main!(tea, sha256, salsa20, poly1305);

@@ -1,7 +1,14 @@
 LUCET_REPO=../lucet
 LUCETC=$(LUCET_REPO)/target/debug/lucetc
 LUCETC_FLAGS=--emit=so
+WASI_CLANG=/opt/wasi-sdk/bin/clang
+WASI_CLANG_FLAGS=-O3
+WASI_LINK_FLAGS=-nostartfiles -Wl,--no-entry -Wl,--export-all
+HACL_STAR=$(HOME)/hacl-star
+HACL_FLAGS=-I$(HACL_STAR)/dist/kremlin/include -I$(HACL_STAR)/dist/kremlin/kremlib/dist/minimal
 WAT2WASM=$(HOME)/wabt-1.0.15/wat2wasm
+WASM2WAT=$(HOME)/wabt-1.0.15/wasm2wat
+WASM_OPT=$(HOME)/binaryen-version_90/wasm-opt
 
 .DEFAULT_GOAL=build
 
@@ -10,8 +17,18 @@ FORCE:
 $(LUCETC): FORCE
 	cd $(LUCET_REPO) && cargo build
 
+wasm_src/%.wasm.unopt: c_src/%.c c_src/%.h
+	$(WASI_CLANG) $(WASI_CLANG_FLAGS) $(HACL_FLAGS) $< -o $@ $(WASI_LINK_FLAGS)
+
+wasm_src/%.wasm: wasm_src/%.wasm.unopt
+	$(WASM_OPT) -mvp --disable-mutable-globals -O4 $< -o $@
+
 wasm_src/%.wasm: wasm_src/%.wat
 	$(WAT2WASM) $< -o $@
+
+wasm_wat/%.wat: wasm_src/%.wasm
+	mkdir -p wasm_wat
+	$(WASM2WAT) $< -o $@
 
 wasm_obj/%/ref.so: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj/$*
@@ -50,7 +67,7 @@ wasm_obj/%/slh_no_v1_1.so: wasm_src/%.wasm $(LUCETC)
 	$(LUCETC) $(LUCETC_FLAGS) --blade-type=slh $< -o $@
 
 .PHONY: all_sos
-all_sos: tea_sos sha256_sos salsa20_sos
+all_sos: tea_sos sha256_sos salsa20_sos poly1305_sos
 
 .PHONY: tea_sos
 tea_sos: \
@@ -87,6 +104,18 @@ salsa20_sos: \
 	wasm_obj/salsa20/lfence_per_block_no_v1_1.so \
 	wasm_obj/salsa20/slh_with_v1_1.so \
 	wasm_obj/salsa20/slh_no_v1_1.so \
+
+.PHONY: poly1305_sos
+poly1305_sos: \
+	wasm_obj/Hacl_Poly1305_32/ref.so \
+	wasm_obj/Hacl_Poly1305_32/baseline_with_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/baseline_no_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/lfence_with_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/lfence_no_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/lfence_per_block_with_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/lfence_per_block_no_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/slh_with_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/slh_no_v1_1.so \
 
 target/debug/blade-benchmarks: all_sos src
 	cargo build

@@ -1,4 +1,4 @@
-use blade_benchmarks::{sha256, tea, blade_setting::BladeType, BladeModule};
+use blade_benchmarks::{hacl_poly1305_32, sha256, tea, blade_setting::BladeType, BladeModule};
 
 fn main() {
     lucet_runtime::lucet_internal_ensure_linked();
@@ -18,4 +18,12 @@ fn main() {
     let hash = module.finalize();
     assert_eq!(hash.as_u8_slice().len(), 32);
     println!("SHA-256 hash of deadbeef_beeff00d is {}", hash);
+
+    let mut module = hacl_poly1305_32::Poly1305Module::new(BladeType::None, false);
+    let message = &[55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36];
+    let key = hacl_poly1305_32::Poly1305Key::new([
+        15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+    ]);
+    let tag = module.mac(&key, message);
+    println!("First byte of the Poly1305 tag of our message is {}", tag.as_u8_slice()[0]);
 }

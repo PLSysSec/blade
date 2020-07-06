@@ -1,4 +1,5 @@
 pub mod blade_setting;
+pub mod hacl_poly1305_32;
 pub mod salsa20;
 pub mod sha256;
 pub mod tea;
