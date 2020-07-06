@@ -1,4 +1,4 @@
-use blade_benchmarks::{hacl_poly1305_32, salsa20, sha256, tea, blade_setting::BladeType, BladeModule};
+use blade_benchmarks::{hacl_curve25519_51, hacl_poly1305_32, salsa20, sha256, tea, blade_setting::BladeType, BladeModule};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 struct Modules<T> {
@@ -157,6 +157,23 @@ pub fn poly1305_mac_of_8192bytes(c: &mut Criterion) {
     })
 }
 
+pub fn curve25519_51_ecdh(c: &mut Criterion) {
+    lucet_runtime::lucet_internal_ensure_linked();
+
+    let mut modules = Modules::<hacl_curve25519_51::Curve25519Module>::new();
+    let pubkey = hacl_curve25519_51::Curve25519Key::new([
+        0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+        201, 203, 205, 207, 209, 211, 213, 215, 217, 219, 221, 223, 225, 227, 229, 231,
+    ]);
+    let privkey = hacl_curve25519_51::Curve25519Key::new([
+        20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+        100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115,
+    ]);
+    modules.bench_all(c, "curve25519_51", |m| {
+        m.ecdh(&pubkey, &privkey);
+    })
+}
+
 pub fn get_some_bytes(howmany: usize) -> Vec<u8> {
     let mut data = Vec::with_capacity(howmany);
     assert_eq!(howmany % 8, 0, "this function expects a multiple of 8 bytes");
@@ -191,4 +208,5 @@ criterion_group!(tea, tea_encrypt, tea_decrypt);
 criterion_group!(sha256, sha256_of_64bytes, sha256_of_1024bytes);
 criterion_group!(salsa20, salsa20_run);
 criterion_group!(poly1305, poly1305_mac_of_1024bytes, poly1305_mac_of_8192bytes);
-criterion_main!(tea, sha256, salsa20, poly1305);
+criterion_group!(curve25519_51, curve25519_51_ecdh);
+criterion_main!(tea, sha256, salsa20, poly1305, curve25519_51);
