@@ -1,4 +1,5 @@
 pub mod blade_setting;
+pub mod hacl_chacha20;
 pub mod hacl_curve25519_51;
 pub mod hacl_poly1305_32;
 pub mod salsa20;
@@ -38,4 +39,23 @@ fn sha256() {
     module.update(data);
     let hash = module.finalize();
     assert_eq!(&hash.as_u8_slice(), &hmac_sha256::Hash::hash(data));
+}
+
+#[test]
+fn hacl_chacha20() {
+    // test round-tripping with Hacl Chacha20
+    let mut module = hacl_chacha20::Chacha20Module::new(blade_setting::BladeType::None, false);
+    let key = hacl_chacha20::Chacha20Key::new([
+        11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133, 144, 155, 166, 177,
+        188, 199, 211, 222, 233, 244, 255, 0, 10, 20, 30, 40, 50, 60, 70, 80,
+    ]);
+    let nonce = hacl_chacha20::Chacha20Nonce::new([
+        98, 76, 54, 32, 10, 0, 2, 4,
+    ]);
+    let message = &[
+        10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250,
+    ];
+    let encrypted = module.encrypt(&key, &nonce, message);
+    let decrypted = module.decrypt(&key, &nonce, &encrypted);
+    assert_eq!(message, decrypted.as_slice());
 }

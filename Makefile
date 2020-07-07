@@ -67,7 +67,7 @@ wasm_obj/%/slh_no_v1_1.so: wasm_src/%.wasm $(LUCETC)
 	$(LUCETC) $(LUCETC_FLAGS) --blade-type=slh $< -o $@
 
 .PHONY: all_sos
-all_sos: tea_sos sha256_sos salsa20_sos poly1305_sos curve25519_51_sos
+all_sos: tea_sos sha256_sos salsa20_sos poly1305_sos curve25519_51_sos chacha20_sos
 
 .PHONY: tea_sos
 tea_sos: \
@@ -128,6 +128,18 @@ curve25519_51_sos: \
 	wasm_obj/Hacl_Curve25519_51/lfence_per_block_no_v1_1.so \
 	wasm_obj/Hacl_Curve25519_51/slh_with_v1_1.so \
 	wasm_obj/Hacl_Curve25519_51/slh_no_v1_1.so \
+
+.PHONY: chacha20_sos
+chacha20_sos: \
+	wasm_obj/Hacl_Chacha20/ref.so \
+	wasm_obj/Hacl_Chacha20/baseline_with_v1_1.so \
+	wasm_obj/Hacl_Chacha20/baseline_no_v1_1.so \
+	wasm_obj/Hacl_Chacha20/lfence_with_v1_1.so \
+	wasm_obj/Hacl_Chacha20/lfence_no_v1_1.so \
+	wasm_obj/Hacl_Chacha20/lfence_per_block_with_v1_1.so \
+	wasm_obj/Hacl_Chacha20/lfence_per_block_no_v1_1.so \
+	wasm_obj/Hacl_Chacha20/slh_with_v1_1.so \
+	wasm_obj/Hacl_Chacha20/slh_no_v1_1.so \
 
 target/debug/blade-benchmarks: all_sos src
 	cargo build

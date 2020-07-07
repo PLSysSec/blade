@@ -1,4 +1,4 @@
-use blade_benchmarks::{hacl_curve25519_51, hacl_poly1305_32, salsa20, sha256, tea, blade_setting::BladeType, BladeModule};
+use blade_benchmarks::{hacl_chacha20, hacl_curve25519_51, hacl_poly1305_32, salsa20, sha256, tea, blade_setting::BladeType, BladeModule};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 struct Modules<T> {
@@ -131,6 +131,23 @@ pub fn salsa20_run(c: &mut Criterion) {
     });
 }
 
+pub fn chacha20_encrypt_8192_bytes(c: &mut Criterion) {
+    lucet_runtime::lucet_internal_ensure_linked();
+
+    let mut modules = Modules::<hacl_chacha20::Chacha20Module>::new();
+    let key = hacl_chacha20::Chacha20Key::new([
+        11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133, 144, 155, 166, 177,
+        188, 199, 211, 222, 233, 244, 255, 0, 10, 20, 30, 40, 50, 60, 70, 80,
+    ]);
+    let nonce = hacl_chacha20::Chacha20Nonce::new([
+        98, 76, 54, 32, 10, 0, 2, 4,
+    ]);
+    let msg = get_some_bytes(8192);
+    modules.bench_all(c, "chacha20 of 8192 bytes", |m| {
+        m.encrypt(&key, &nonce, &msg);
+    })
+}
+
 pub fn poly1305_mac_of_1024bytes(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
@@ -139,7 +156,7 @@ pub fn poly1305_mac_of_1024bytes(c: &mut Criterion) {
         [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
     );
     let msg = get_some_bytes(1024);
-    modules.bench_all(c, "poly1305", |m| {
+    modules.bench_all(c, "poly1305 of 1024 bytes", |m| {
         m.mac(&key, &msg);
     })
 }
@@ -152,7 +169,7 @@ pub fn poly1305_mac_of_8192bytes(c: &mut Criterion) {
         [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
     );
     let msg = get_some_bytes(8192);
-    modules.bench_all(c, "poly1305", |m| {
+    modules.bench_all(c, "poly1305 of 8192 bytes", |m| {
         m.mac(&key, &msg);
     })
 }
@@ -207,6 +224,7 @@ pub fn get_some_bytes(howmany: usize) -> Vec<u8> {
 criterion_group!(tea, tea_encrypt, tea_decrypt);
 criterion_group!(sha256, sha256_of_64bytes, sha256_of_1024bytes);
 criterion_group!(salsa20, salsa20_run);
+criterion_group!(chacha20, chacha20_encrypt_8192_bytes);
 criterion_group!(poly1305, poly1305_mac_of_1024bytes, poly1305_mac_of_8192bytes);
 criterion_group!(curve25519_51, curve25519_51_ecdh);
-criterion_main!(tea, sha256, salsa20, poly1305, curve25519_51);
+criterion_main!(tea, sha256, salsa20, chacha20, poly1305, curve25519_51);
