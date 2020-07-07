@@ -5,7 +5,7 @@ use lucet_runtime::InstanceHandle;
 use std::fmt;
 
 const KEY_BYTES: usize = 32;
-const NONCE_BYTES: usize = 8;
+const NONCE_BYTES: usize = 12;
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Chacha20Key {
