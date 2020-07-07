@@ -29,7 +29,7 @@ impl fmt::Display for Chacha20Key {
         write!(f, "{:02x}{:02x}{:02x}{:02x}_", self.key[16], self.key[17], self.key[18], self.key[19])?;
         write!(f, "{:02x}{:02x}{:02x}{:02x}_", self.key[20], self.key[21], self.key[22], self.key[23])?;
         write!(f, "{:02x}{:02x}{:02x}{:02x}_", self.key[24], self.key[25], self.key[26], self.key[27])?;
-        write!(f, "{:02x}{:02x}{:02x}{:02x}_", self.key[28], self.key[29], self.key[30], self.key[31])?;
+        write!(f, "{:02x}{:02x}{:02x}{:02x}", self.key[28], self.key[29], self.key[30], self.key[31])?;
         Ok(())
     }
 }

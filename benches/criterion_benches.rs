@@ -140,7 +140,7 @@ pub fn chacha20_encrypt_8192_bytes(c: &mut Criterion) {
         188, 199, 211, 222, 233, 244, 255, 0, 10, 20, 30, 40, 50, 60, 70, 80,
     ]);
     let nonce = hacl_chacha20::Chacha20Nonce::new([
-        98, 76, 54, 32, 10, 0, 2, 4,
+        98, 76, 54, 32, 10, 0, 2, 4, 6, 8, 10, 12,
     ]);
     let msg = get_some_bytes(8192);
     modules.bench_all(c, "chacha20 of 8192 bytes", |m| {
