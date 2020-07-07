@@ -1,4 +1,4 @@
-use blade_benchmarks::{hacl_curve25519_51, hacl_poly1305_32, sha256, tea, blade_setting::BladeType, BladeModule};
+use blade_benchmarks::{hacl_curve25519_51, hacl_poly1305_32, hacl_chacha20, sha256, tea, blade_setting::BladeType, BladeModule};
 
 fn main() {
     lucet_runtime::lucet_internal_ensure_linked();
@@ -10,6 +10,25 @@ fn main() {
     let decrypted = module.decrypt(&encrypted, &key);
     println!("Tea encryption of {} with key {} is {}", message, key, encrypted);
     println!("Tea decryption of {} with key {} is {}", encrypted, key, decrypted);
+
+    // example from https://www.cryptopp.com/wiki/ChaCha20#Encryption_and_Decryption
+    // so that I could debug the target ciphertext
+    let mut module = hacl_chacha20::Chacha20Module::new(BladeType::None, false);
+    let message = String::from("My Plaintext!! My Dear plaintext!!").into_bytes();
+    let key = hacl_chacha20::Chacha20Key::new([
+        0xF2, 0x1C, 0xD8, 0x58, 0x3F, 0x95, 0x18, 0x08,
+        0xA0, 0x1C, 0x16, 0x96, 0x3A, 0xC4, 0xAD, 0x23,
+        0xFC, 0x35, 0x66, 0x25, 0xD9, 0xBA, 0xCE, 0x17,
+        0x82, 0x5F, 0xDE, 0xC3, 0xBB, 0xA1, 0xA9, 0x32,
+    ]);
+    let nonce = hacl_chacha20::Chacha20Nonce::new([
+        0, 0, 0, 0,
+        0x7B, 0xAD, 0x60, 0x60, 0x55, 0x18, 0xA6, 0x81, 
+    ]);
+    let encrypted = module.encrypt(&key, &nonce, &message);
+    let decrypted = module.decrypt(&key, &nonce, &encrypted);
+    println!("Chacha20 encryption of \"{}\" with key {} and nonce {} is {}", std::str::from_utf8(&message).unwrap(), key, nonce, hex::encode(&encrypted));
+    println!("Chacha20 encryption of \"{}\" with key {} and nonce {} is {}", hex::encode(&encrypted), key, nonce, std::str::from_utf8(&decrypted).unwrap());
 
     let mut module = sha256::SHA256Module::new(BladeType::None, false);
     module.init();

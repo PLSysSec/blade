@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 lucet-runtime = { path = "../lucet/lucet-runtime" }
+hex = "0.4.2"
 
 [dev-dependencies]
 criterion = "0.3.3"
