@@ -159,6 +159,11 @@ test: target/debug/blade-benchmarks
 bench: target/debug/blade-benchmarks
 	cargo bench
 
+# prints a report of the most recent `make bench` to stdout
+.PHONY: report
+report:
+	cd analysis && cargo run
+
 disasm_tea_%: wasm_obj/tea/%.so
 	objdump -SDg $< | less
 disasm_sha256_%: wasm_obj/sha256/%.so
@@ -173,6 +178,7 @@ obj_clean:
 .PHONY: clean
 clean: obj_clean
 	cargo clean
+	cd analysis && cargo clean
 
 .PHONY: fullclean
 fullclean: clean
