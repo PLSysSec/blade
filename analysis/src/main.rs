@@ -4,8 +4,10 @@ use std::fmt;
 use std::path::Path;
 
 const CRITERION_DIR: &'static str = "../target/criterion";
+const DEF_COUNTS_FILE: &'static str = "def_counts.json";
 
 fn main() {
+    let def_counts = get_def_counts();
     for group_path in std::fs::read_dir(Path::new(CRITERION_DIR))
         .unwrap_or_else(|e| panic!("Failed to read dir {:?}: {}. \nHint: perhaps you haven't run `make bench`?", CRITERION_DIR, e))
         .filter_map(|direntry| direntry.ok())
@@ -19,10 +21,15 @@ fn main() {
             assert_eq!(ref_result.name, "Ref");
             ref_result.mean_estimate
         };
+        let group_def_counts = def_counts.get(group_name);
         println!("{}:", group_name);
         for result in results {
             let overhead = (result.mean_estimate / ref_value - 1.0) * 100.0_f64;
-            println!("{}  {:.1}%", result, overhead);
+            let def_count = match group_def_counts {
+                None => "unknown".into(),
+                Some(group_def_counts) => group_def_counts.get(&result.name).map(|u| u.to_string()).unwrap_or("unknown".into()),
+            };
+            println!("{}  {:.1}%   {}", result, overhead, def_count);
         }
         println!();
     }
@@ -90,6 +97,20 @@ impl BenchmarkResult {
 
 impl fmt::Display for BenchmarkResult {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:18} {:.1} us", self.name, self.mean_estimate / 1000.0_f64)
+        write!(f, "{:20} {:.1} us", self.name, self.mean_estimate / 1000.0_f64)
     }
+}
+
+fn get_def_counts() -> HashMap<String, HashMap<String, usize>> {
+    let contents = std::fs::read_to_string(DEF_COUNTS_FILE).unwrap_or_else(|e| panic!("Failed to read file at {:?}: {}", DEF_COUNTS_FILE, e));
+    let parsed = json::parse(&contents).unwrap();
+    parsed.entries()
+        .map(|(key, val)| (key.into(), json_to_hashmap(val)))
+        .collect()
+}
+
+fn json_to_hashmap(parsed: &json::JsonValue) -> HashMap<String, usize> {
+    parsed.entries()
+        .map(|(key, val)| (key.into(), val.as_usize().expect("Couldn't read value as usize")))
+        .collect()
 }
