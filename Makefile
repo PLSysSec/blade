@@ -34,13 +34,21 @@ wasm_obj/%/ref.so: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj/$*
 	$(LUCETC) $(LUCETC_FLAGS) --blade-type=none $< -o $@
 
-wasm_obj/%/baseline_with_v1_1.so: wasm_src/%.wasm $(LUCETC)
+wasm_obj/%/baseline_fence_with_v1_1.so: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj/$*
-	$(LUCETC) $(LUCETC_FLAGS) --blade-type=baseline --blade-v1-1 $< -o $@
+	$(LUCETC) $(LUCETC_FLAGS) --blade-type=baseline_fence --blade-v1-1 $< -o $@
 
-wasm_obj/%/baseline_no_v1_1.so: wasm_src/%.wasm $(LUCETC)
+wasm_obj/%/baseline_fence_no_v1_1.so: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj/$*
-	$(LUCETC) $(LUCETC_FLAGS) --blade-type=baseline $< -o $@
+	$(LUCETC) $(LUCETC_FLAGS) --blade-type=baseline_fence $< -o $@
+
+wasm_obj/%/baseline_slh_with_v1_1.so: wasm_src/%.wasm $(LUCETC)
+	mkdir -p wasm_obj/$*
+	$(LUCETC) $(LUCETC_FLAGS) --blade-type=baseline_slh --blade-v1-1 $< -o $@
+
+wasm_obj/%/baseline_slh_no_v1_1.so: wasm_src/%.wasm $(LUCETC)
+	mkdir -p wasm_obj/$*
+	$(LUCETC) $(LUCETC_FLAGS) --blade-type=baseline_slh $< -o $@
 
 wasm_obj/%/lfence_with_v1_1.so: wasm_src/%.wasm $(LUCETC)
 	mkdir -p wasm_obj/$*
@@ -72,8 +80,10 @@ all_sos: tea_sos sha256_sos salsa20_sos poly1305_sos curve25519_51_sos chacha20_
 .PHONY: tea_sos
 tea_sos: \
 	wasm_obj/tea/ref.so \
-	wasm_obj/tea/baseline_with_v1_1.so \
-	wasm_obj/tea/baseline_no_v1_1.so \
+	wasm_obj/tea/baseline_fence_with_v1_1.so \
+	wasm_obj/tea/baseline_fence_no_v1_1.so \
+	wasm_obj/tea/baseline_slh_with_v1_1.so \
+	wasm_obj/tea/baseline_slh_no_v1_1.so \
 	wasm_obj/tea/lfence_with_v1_1.so \
 	wasm_obj/tea/lfence_no_v1_1.so \
 	wasm_obj/tea/lfence_per_block_with_v1_1.so \
@@ -84,8 +94,10 @@ tea_sos: \
 .PHONY: sha256_sos
 sha256_sos: \
 	wasm_obj/sha256/ref.so \
-	wasm_obj/sha256/baseline_with_v1_1.so \
-	wasm_obj/sha256/baseline_no_v1_1.so \
+	wasm_obj/sha256/baseline_fence_with_v1_1.so \
+	wasm_obj/sha256/baseline_fence_no_v1_1.so \
+	wasm_obj/sha256/baseline_slh_with_v1_1.so \
+	wasm_obj/sha256/baseline_slh_no_v1_1.so \
 	wasm_obj/sha256/lfence_with_v1_1.so \
 	wasm_obj/sha256/lfence_no_v1_1.so \
 	wasm_obj/sha256/lfence_per_block_with_v1_1.so \
@@ -96,8 +108,10 @@ sha256_sos: \
 .PHONY: salsa20_sos
 salsa20_sos: \
 	wasm_obj/salsa20/ref.so \
-	wasm_obj/salsa20/baseline_with_v1_1.so \
-	wasm_obj/salsa20/baseline_no_v1_1.so \
+	wasm_obj/salsa20/baseline_fence_with_v1_1.so \
+	wasm_obj/salsa20/baseline_fence_no_v1_1.so \
+	wasm_obj/salsa20/baseline_slh_with_v1_1.so \
+	wasm_obj/salsa20/baseline_slh_no_v1_1.so \
 	wasm_obj/salsa20/lfence_with_v1_1.so \
 	wasm_obj/salsa20/lfence_no_v1_1.so \
 	wasm_obj/salsa20/lfence_per_block_with_v1_1.so \
@@ -108,8 +122,10 @@ salsa20_sos: \
 .PHONY: poly1305_sos
 poly1305_sos: \
 	wasm_obj/Hacl_Poly1305_32/ref.so \
-	wasm_obj/Hacl_Poly1305_32/baseline_with_v1_1.so \
-	wasm_obj/Hacl_Poly1305_32/baseline_no_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/baseline_fence_with_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/baseline_fence_no_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/baseline_slh_with_v1_1.so \
+	wasm_obj/Hacl_Poly1305_32/baseline_slh_no_v1_1.so \
 	wasm_obj/Hacl_Poly1305_32/lfence_with_v1_1.so \
 	wasm_obj/Hacl_Poly1305_32/lfence_no_v1_1.so \
 	wasm_obj/Hacl_Poly1305_32/lfence_per_block_with_v1_1.so \
@@ -120,8 +136,10 @@ poly1305_sos: \
 .PHONY: curve25519_51_sos
 curve25519_51_sos: \
 	wasm_obj/Hacl_Curve25519_51/ref.so \
-	wasm_obj/Hacl_Curve25519_51/baseline_with_v1_1.so \
-	wasm_obj/Hacl_Curve25519_51/baseline_no_v1_1.so \
+	wasm_obj/Hacl_Curve25519_51/baseline_fence_with_v1_1.so \
+	wasm_obj/Hacl_Curve25519_51/baseline_fence_no_v1_1.so \
+	wasm_obj/Hacl_Curve25519_51/baseline_slh_with_v1_1.so \
+	wasm_obj/Hacl_Curve25519_51/baseline_slh_no_v1_1.so \
 	wasm_obj/Hacl_Curve25519_51/lfence_with_v1_1.so \
 	wasm_obj/Hacl_Curve25519_51/lfence_no_v1_1.so \
 	wasm_obj/Hacl_Curve25519_51/lfence_per_block_with_v1_1.so \
@@ -132,8 +150,10 @@ curve25519_51_sos: \
 .PHONY: chacha20_sos
 chacha20_sos: \
 	wasm_obj/Hacl_Chacha20/ref.so \
-	wasm_obj/Hacl_Chacha20/baseline_with_v1_1.so \
-	wasm_obj/Hacl_Chacha20/baseline_no_v1_1.so \
+	wasm_obj/Hacl_Chacha20/baseline_fence_with_v1_1.so \
+	wasm_obj/Hacl_Chacha20/baseline_fence_no_v1_1.so \
+	wasm_obj/Hacl_Chacha20/baseline_slh_with_v1_1.so \
+	wasm_obj/Hacl_Chacha20/baseline_slh_no_v1_1.so \
 	wasm_obj/Hacl_Chacha20/lfence_with_v1_1.so \
 	wasm_obj/Hacl_Chacha20/lfence_no_v1_1.so \
 	wasm_obj/Hacl_Chacha20/lfence_per_block_with_v1_1.so \

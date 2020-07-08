@@ -3,8 +3,10 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 struct Modules<T> {
     reference: T,
-    baseline_with_v1_1: T,
-    baseline_no_v1_1: T,
+    baseline_fence_with_v1_1: T,
+    baseline_fence_no_v1_1: T,
+    baseline_slh_with_v1_1: T,
+    baseline_slh_no_v1_1: T,
     lfence_with_v1_1: T,
     lfence_no_v1_1: T,
     //lfence_per_block_with_v1_1: T,
@@ -17,8 +19,10 @@ impl<T: BladeModule> Modules<T> {
     fn new() -> Self {
         Self {
             reference: T::new(BladeType::None, false),
-            baseline_with_v1_1: T::new(BladeType::Baseline, true),
-            baseline_no_v1_1: T::new(BladeType::Baseline, false),
+            baseline_fence_with_v1_1: T::new(BladeType::BaselineFence, true),
+            baseline_fence_no_v1_1: T::new(BladeType::BaselineFence, false),
+            baseline_slh_with_v1_1: T::new(BladeType::BaselineSLH, true),
+            baseline_slh_no_v1_1: T::new(BladeType::BaselineSLH, false),
             lfence_with_v1_1: T::new(BladeType::Lfence, true),
             lfence_no_v1_1: T::new(BladeType::Lfence, false),
             //lfence_per_block_with_v1_1: T::new(BladeType::LfencePerBlock, true),
@@ -34,11 +38,17 @@ impl<T: BladeModule> Modules<T> {
         group.bench_function("Ref", |b| b.iter(|| {
             f(&mut self.reference);
         }));
-        group.bench_function("Baseline with v1.1", |b| b.iter(|| {
-            f(&mut self.baseline_with_v1_1);
+        group.bench_function("Baseline-F with v1.1", |b| b.iter(|| {
+            f(&mut self.baseline_fence_with_v1_1);
         }));
-        group.bench_function("Baseline no v1.1", |b| b.iter(|| {
-            f(&mut self.baseline_no_v1_1);
+        group.bench_function("Baseline-F no v1.1", |b| b.iter(|| {
+            f(&mut self.baseline_fence_no_v1_1);
+        }));
+        group.bench_function("Baseline-S with v1.1", |b| b.iter(|| {
+            f(&mut self.baseline_slh_with_v1_1);
+        }));
+        group.bench_function("Baseline-S no v1.1", |b| b.iter(|| {
+            f(&mut self.baseline_slh_no_v1_1);
         }));
         group.bench_function("Lfence with v1.1", |b| b.iter(|| {
             f(&mut self.lfence_with_v1_1);
