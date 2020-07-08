@@ -1,2 +1,51 @@
 {
+  "tea encrypt": {
+    "Ref":        { "with_v1_1": 0, "no_v1_1": 0 },
+    "Baseline-F": { "with_v1_1": 6, "no_v1_1": 0 },
+    "Baseline-S": { "with_v1_1": 6, "no_v1_1": 0 },
+    "Lfence":     { "with_v1_1": 0, "no_v1_1": 0 },
+    "SLH":        { "with_v1_1": 6, "no_v1_1": 0 }
+  },
+   "tea decrypt": {
+    "Ref":        { "with_v1_1": 0, "no_v1_1": 0 },
+    "Baseline-F": { "with_v1_1": 6, "no_v1_1": 0 },
+    "Baseline-S": { "with_v1_1": 6, "no_v1_1": 0 },
+    "Lfence":     { "with_v1_1": 0, "no_v1_1": 0 },
+    "SLH":        { "with_v1_1": 6, "no_v1_1": 0 }
+  },
+  "sha256": {
+    "Ref":        { "with_v1_1": 0, "no_v1_1": 0 },
+    "Baseline-F": { "with_v1_1": 54, "no_v1_1": 23 },
+    "Baseline-S": { "with_v1_1": 54, "no_v1_1": 23 },
+    "Lfence":     { "with_v1_1": 0, "no_v1_1": 0 },
+    "SLH":        { "with_v1_1": 99, "no_v1_1": 0 }
+  },
+  "salsa20": {
+    "Ref":        { "with_v1_1": 0, "no_v1_1": 0 },
+    "Baseline-F": { "with_v1_1": 99, "no_v1_1": 3 },
+    "Baseline-S": { "with_v1_1": 99, "no_v1_1": 3 },
+    "Lfence":     { "with_v1_1": 3, "no_v1_1": 0 },
+    "SLH":        { "with_v1_1": 54, "no_v1_1": 0 }
+  },
+  "chacha20": {
+    "Ref":        { "with_v1_1": 0, "no_v1_1": 0 },
+    "Baseline-F": { "with_v1_1": 142, "no_v1_1": 136 },
+    "Baseline-S": { "with_v1_1": 142, "no_v1_1": 136 },
+    "Lfence":     { "with_v1_1": 7, "no_v1_1": 3 },
+    "SLH":        { "with_v1_1": 142, "no_v1_1": 3 }
+  },
+  "poly1305": {
+    "Ref":        { "with_v1_1": 0, "no_v1_1": 0 },
+    "Baseline-F": { "with_v1_1": 139, "no_v1_1": 133 },
+    "Baseline-S": { "with_v1_1": 139, "no_v1_1": 133 },
+    "Lfence":     { "with_v1_1": 9, "no_v1_1": 3 },
+    "SLH":        { "with_v1_1": 139, "no_v1_1": 3 }
+  },
+  "curve25519_51": {
+    "Ref":        { "with_v1_1": 0, "no_v1_1": 0 },
+    "Baseline-F": { "with_v1_1": 1887, "no_v1_1": 1862 },
+    "Baseline-S": { "with_v1_1": 1887, "no_v1_1": 1862 },
+    "Lfence":     { "with_v1_1": 256, "no_v1_1": 235 },
+    "SLH":        { "with_v1_1": 1887, "no_v1_1": 1419 }
+  }
 }

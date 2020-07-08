@@ -16,6 +16,9 @@ These will generate the appropriate `.wasm` and `.so` files and then run
 the tests/benchmarks.
 There are also additional useful targets `make disasm_*` and `make wasm_wat/*`
 for various `*`.
+Once you've run benchmarks, you can also `make report`, which prints
+human-readable benchmark statistics to stdout, and creates a LaTeX table at
+`analysis/table.tex`.
 
 [lucet-blade]: https://github.com/PLSysSec/lucet-blade
 [wasmtime-blade]: https://github.com/PLSysSec/wasmtime-blade

@@ -4,3 +4,4 @@
 wasm_obj
 wasm_wat
 analysis/target
+analysis/table.tex
