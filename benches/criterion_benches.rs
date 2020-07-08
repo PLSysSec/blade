@@ -109,13 +109,13 @@ pub fn sha256_of_64bytes(c: &mut Criterion) {
     });
 }
 
-pub fn sha256_of_1024bytes(c: &mut Criterion) {
+pub fn sha256_of_8192bytes(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
 
     let mut modules = Modules::<sha256::SHA256Module>::new();
-    let data = get_some_bytes(1024);
+    let data = get_some_bytes(8192);
 
-    modules.bench_all(c, "sha256 of 1024 bytes", |m| {
+    modules.bench_all(c, "sha256 of 8192 bytes", |m| {
         m.init();
         m.update(&data);
         m.finalize();
@@ -222,7 +222,7 @@ pub fn get_some_bytes(howmany: usize) -> Vec<u8> {
 }
 
 criterion_group!(tea, tea_encrypt, tea_decrypt);
-criterion_group!(sha256, sha256_of_64bytes, sha256_of_1024bytes);
+criterion_group!(sha256, sha256_of_64bytes, sha256_of_8192bytes);
 criterion_group!(salsa20, salsa20_run);
 criterion_group!(chacha20, chacha20_encrypt_8192_bytes);
 criterion_group!(poly1305, poly1305_mac_of_1024bytes, poly1305_mac_of_8192bytes);
