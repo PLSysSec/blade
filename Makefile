@@ -1,4 +1,4 @@
-LUCET_REPO=../lucet
+LUCET_REPO=../lucet-blade
 LUCETC=$(LUCET_REPO)/target/debug/lucetc
 LUCETC_FLAGS=--emit=so --guard-size "4GiB" --min-reserved-size "4GiB" --max-reserved-size "4GiB"
 WASI_CLANG=/opt/wasi-sdk/bin/clang
