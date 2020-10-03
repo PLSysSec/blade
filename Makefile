@@ -1,6 +1,6 @@
 LUCET_REPO=../lucet
 LUCETC=$(LUCET_REPO)/target/debug/lucetc
-LUCETC_FLAGS=--emit=so
+LUCETC_FLAGS=--emit=so --guard-size "4GiB" --min-reserved-size "4GiB" --max-reserved-size "4GiB"
 WASI_CLANG=/opt/wasi-sdk/bin/clang
 WASI_CLANG_FLAGS=-O3
 WASI_LINK_FLAGS=-nostartfiles -Wl,--no-entry -Wl,--export-all
@@ -179,7 +179,8 @@ test: target/debug/blade-benchmarks
 bench: target/debug/blade-benchmarks
 	cargo bench
 
-# prints a report of the most recent `make bench` to stdout
+# prints a report of the most recent `make bench` to stdout (human readable)
+# and to `analysis/table.tex` (LaTeX)
 .PHONY: report
 report:
 	cd analysis && cargo run
@@ -189,6 +190,8 @@ disasm_tea_%: wasm_obj/tea/%.so
 disasm_sha256_%: wasm_obj/sha256/%.so
 	objdump -SDg $< | less
 disasm_salsa20_%: wasm_obj/salsa20/%.so
+	objdump -SDg $< | less
+disasm_chacha20_%: wasm_obj/Hacl_Chacha20/%.so
 	objdump -SDg $< | less
 
 .PHONY: obj_clean
