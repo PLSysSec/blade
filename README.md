@@ -56,6 +56,7 @@ benchmarks by using `make wasm_wat/*` for the appropriate `*`.
     - For Baseline-S: `--blade-type=baseline_slh`
     - For Blade-F: `--blade-type=lfence`
     - For Blade-S: `--blade-type=slh`
+
   You can also choose to enable the v1.1 mitigations with the `--blade-v1-1`
   flag to `lucetc` (off by default).
 
@@ -64,4 +65,5 @@ benchmarks by using `make wasm_wat/*` for the appropriate `*`.
 [WASI SDK]: https://github.com/WebAssembly/wasi-sdk
 [WABT]: https://github.com/WebAssembly/wabt
 [Binaryen]: https://github.com/WebAssembly/binaryen
+[HACL*]: https://github.com/project-everest/hacl-star/
 [rustup]: https://rustup.rs
