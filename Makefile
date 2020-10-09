@@ -1,21 +1,25 @@
-LUCET_REPO=../lucet-blade
-LUCETC=$(LUCET_REPO)/target/debug/lucetc
+LUCET_BLADE=../lucet-blade
+WASI_SDK=/opt/wasi-sdk
+WABT=$(HOME)/wabt-1.0.15
+BINARYEN=$(HOME)/binaryen-version_90
+HACL_STAR=$(HOME)/hacl-star
+
+LUCETC=$(LUCET_BLADE)/target/debug/lucetc
 LUCETC_FLAGS=--emit=so --guard-size "4GiB" --min-reserved-size "4GiB" --max-reserved-size "4GiB"
-WASI_CLANG=/opt/wasi-sdk/bin/clang
+WASI_CLANG=$(WASI_SDK)/bin/clang
 WASI_CLANG_FLAGS=-O3
 WASI_LINK_FLAGS=-nostartfiles -Wl,--no-entry -Wl,--export-all
-HACL_STAR=$(HOME)/hacl-star
+WAT2WASM=$(WABT)/wat2wasm
+WASM2WAT=$(WABT)/wasm2wat
+WASM_OPT=$(BINARYEN)/wasm-opt
 HACL_FLAGS=-I$(HACL_STAR)/dist/kremlin/include -I$(HACL_STAR)/dist/kremlin/kremlib/dist/minimal
-WAT2WASM=$(HOME)/wabt-1.0.15/wat2wasm
-WASM2WAT=$(HOME)/wabt-1.0.15/wasm2wat
-WASM_OPT=$(HOME)/binaryen-version_90/wasm-opt
 
 .DEFAULT_GOAL=build
 
 .PHONY: FORCE
 FORCE:
 $(LUCETC): FORCE
-	cd $(LUCET_REPO) && cargo build
+	cd $(LUCET_BLADE) && cargo build
 
 wasm_src/%.wasm.unopt: c_src/%.c c_src/%.h
 	$(WASI_CLANG) $(WASI_CLANG_FLAGS) $(HACL_FLAGS) $< -o $@ $(WASI_LINK_FLAGS)
@@ -205,4 +209,4 @@ clean: obj_clean
 
 .PHONY: fullclean
 fullclean: clean
-	cd $(LUCET_REPO) && cargo clean
+	cd $(LUCET_BLADE) && cargo clean
