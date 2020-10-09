@@ -49,16 +49,16 @@ benchmarks by using `make wasm_wat/*` for the appropriate `*`.
   from the `Makefile`
   - Then compile these Wasm files to native code using our modified Lucet
   compiler (`$(LUCET_BLADE)/target/debug/lucetc`) and the `LUCETC_FLAGS` from
-  the `Makefile`. You can choose the Blade mitigation using the
-  `--blade-type` flag to `lucetc`:
+  the `Makefile`.
+  - You can choose the Blade mitigation using the `--blade-type` flag to
+  `lucetc`:
     - For Ref: `--blade-type=none`
     - For Baseline-F: `--blade-type=baseline_fence`
     - For Baseline-S: `--blade-type=baseline_slh`
     - For Blade-F: `--blade-type=lfence`
     - For Blade-S: `--blade-type=slh`
-
-  You can also choose to enable the v1.1 mitigations with the `--blade-v1-1`
-  flag to `lucetc` (off by default).
+  - You can also choose to enable the v1.1 mitigations with the
+  `--blade-v1-1` flag to `lucetc` (off by default).
 
 [our paper]: https://arxiv.org/abs/2005.00294
 [`lucet-blade`]: https://github.com/PLSysSec/lucet-blade
