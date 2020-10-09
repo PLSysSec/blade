@@ -20,6 +20,9 @@ You will need:
 In the `Makefile` in this repo, adjust the variables at the top according to
 the paths to each of these dependencies on your system.
 
+Also adjust the `Cargo.toml` in this repo if necessary, with the appropriate
+path to `lucet-blade` for the `lucet-runtime` dependency.
+
 Then, `make build` in this repo, which should build our modified Lucet, all
 of our Wasm examples, and the test framework.
 
