@@ -183,11 +183,13 @@ test: target/debug/blade-benchmarks
 bench: target/debug/blade-benchmarks
 	cargo bench
 
-# prints a report of the most recent `make bench` to stdout (human readable)
-# and to `analysis/table.tex` (LaTeX)
+# Prints a report of the most recent `make bench` to stdout (human readable)
+# and to `analysis/table.tex` (LaTeX).
+# Also writes SHA256 scaling data to `analysis/sha256_scaling.json` and
+# creates associated plots in `analysis/figures`.
 .PHONY: report
 report:
-	cd analysis && cargo run
+	cd analysis && cargo run && python3 ./sha256_scaling_plots.py
 
 disasm_tea_%: wasm_obj/tea/%.so
 	objdump -SDg $< | less

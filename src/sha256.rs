@@ -1,6 +1,7 @@
 use crate::blade_setting::BladeType;
 use crate::module::{get_lucet_module, BladeModule};
 
+use std::convert::TryInto;
 use std::fmt;
 
 use lucet_runtime::InstanceHandle;
@@ -25,6 +26,14 @@ impl SHA256Module {
     }
 
     pub fn update(&mut self, data: &[u8]) {
+        // Ensure that the wasm heap is at least 1000 bytes more than the amount of data we want to put in; else, expand it
+        let current_heap_size_bytes = self.so.heap().len();
+        let target_heap_size_bytes = data.len() + 1000;
+        if current_heap_size_bytes < target_heap_size_bytes {
+            let number_of_bytes_to_expand: u32 = (target_heap_size_bytes - current_heap_size_bytes).try_into().unwrap();
+            self.so.grow_memory(number_of_bytes_to_expand / 4096 + 1).unwrap();
+        }
+
         let heap = self.so.heap_mut();
         // the wasm function expects the input data starting at heap byte 652
         for (idx, &b) in data.iter().enumerate() {

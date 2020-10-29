@@ -5,3 +5,5 @@ wasm_obj
 wasm_wat
 analysis/target
 analysis/table.tex
+analysis/figures
+analysis/sha256_scaling.json

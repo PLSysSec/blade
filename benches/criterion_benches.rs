@@ -97,31 +97,35 @@ pub fn tea_decrypt(c: &mut Criterion) {
     });
 }
 
-pub fn sha256_of_64bytes(c: &mut Criterion) {
-    lucet_runtime::lucet_internal_ensure_linked();
+macro_rules! bench_sha256 {
+    ($size_bytes:expr, $name:ident) => {
+        pub fn $name(c: &mut Criterion) {
+            lucet_runtime::lucet_internal_ensure_linked();
 
-    let mut modules = Modules::<sha256::SHA256Module>::new();
-    let data = get_some_bytes(64);
+            let mut modules = Modules::<sha256::SHA256Module>::new();
+            let data = get_some_bytes($size_bytes);
+            let bench_name = format!("sha256 of {} bytes", $size_bytes);
 
-    modules.bench_all(c, "sha256 of 64 bytes", |m| {
-        m.init();
-        m.update(&data);
-        m.finalize();
-    });
+            modules.bench_all(c, &bench_name, |m| {
+                m.init();
+                m.update(&data);
+                m.finalize();
+            });
+        }
+    }
 }
 
-pub fn sha256_of_8192bytes(c: &mut Criterion) {
-    lucet_runtime::lucet_internal_ensure_linked();
-
-    let mut modules = Modules::<sha256::SHA256Module>::new();
-    let data = get_some_bytes(8192);
-
-    modules.bench_all(c, "sha256 of 8192 bytes", |m| {
-        m.init();
-        m.update(&data);
-        m.finalize();
-    });
-}
+bench_sha256!(64, sha256_of_64bytes);
+bench_sha256!(128, sha256_of_128bytes);
+bench_sha256!(256, sha256_of_256bytes);
+bench_sha256!(512, sha256_of_512bytes);
+bench_sha256!(1024, sha256_of_1024bytes);
+bench_sha256!(2048, sha256_of_2048bytes);
+bench_sha256!(4096, sha256_of_4096bytes);
+bench_sha256!(8192, sha256_of_8192bytes);
+bench_sha256!(16384, sha256_of_16384bytes);
+bench_sha256!(32768, sha256_of_32768bytes);
+bench_sha256!(65536, sha256_of_65536bytes);
 
 pub fn salsa20_run(c: &mut Criterion) {
     lucet_runtime::lucet_internal_ensure_linked();
@@ -223,7 +227,19 @@ pub fn get_some_bytes(howmany: usize) -> Vec<u8> {
 }
 
 criterion_group!(tea, tea_encrypt, tea_decrypt);
-criterion_group!(sha256, sha256_of_64bytes, sha256_of_8192bytes);
+criterion_group!(sha256,
+    sha256_of_64bytes,
+    sha256_of_128bytes,
+    sha256_of_256bytes,
+    sha256_of_512bytes,
+    sha256_of_1024bytes,
+    sha256_of_2048bytes,
+    sha256_of_4096bytes,
+    sha256_of_8192bytes,
+    sha256_of_16384bytes,
+    sha256_of_32768bytes,
+    sha256_of_65536bytes,
+);
 criterion_group!(salsa20, salsa20_run);
 criterion_group!(chacha20, chacha20_encrypt_8192_bytes);
 criterion_group!(poly1305, poly1305_mac_of_1024bytes, poly1305_mac_of_8192bytes);

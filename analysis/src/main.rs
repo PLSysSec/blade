@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::collections::hash_map::Entry;
 use std::fmt;
 use std::fs::File;
@@ -8,17 +8,25 @@ use std::path::Path;
 const CRITERION_DIR: &'static str = "../target/criterion";
 const DEF_COUNTS_FILE: &'static str = "def_counts.json";
 const LATEX_TABLE_FILE: &'static str = "table.tex";
+const SHA256_SCALING_JSON_FILE: &'static str = "sha256_scaling.json";
 
-/// Don't include results for these groups even if the results are present
+/// Don't include results for these groups (in the primary results) even if the
+/// results are present
 const BLACKLISTED_GROUPS: &'static [&'static str] = &[
     "tea encrypt",
     "tea decrypt",
+    "sha256 of 128 bytes",
+    "sha256 of 256 bytes",
+    "sha256 of 512 bytes",
+    "sha256 of 1024 bytes",
+    "sha256 of 2048 bytes",
+    "sha256 of 4096 bytes",
+    "sha256 of 16384 bytes",
+    "sha256 of 32768 bytes",
+    "sha256 of 65536 bytes",
 ];
 
 fn main() {
-    let def_counts = get_def_counts();
-    let mut latex = File::create(LATEX_TABLE_FILE).unwrap_or_else(|e| panic!("Failed to create file {:?}: {}", LATEX_TABLE_FILE, e));
-    writeln!(latex, "{}", latex_table_preamble()).unwrap();
     let group_results = std::fs::read_dir(Path::new(CRITERION_DIR))
         .unwrap_or_else(|e| panic!("Failed to read dir {:?}: {}. \nHint: perhaps you haven't run `make bench`?", CRITERION_DIR, e))
         .filter_map(|direntry| direntry.ok())
@@ -27,7 +35,17 @@ fn main() {
         .map(|group_path| GroupResult::from_group_path(group_path))
         .map(|group_result| (group_result.name.clone(), group_result))
         .collect();
-    for group_result in our_group_sort(group_results) {
+    let group_results = our_group_sort(group_results);
+
+    primary_results(&group_results);
+    sha256_scaling_results(&group_results);
+}
+
+fn primary_results<'a>(group_results: impl IntoIterator<Item = &'a GroupResult>) {
+    let def_counts = get_def_counts();
+    let mut latex = File::create(LATEX_TABLE_FILE).unwrap_or_else(|e| panic!("Failed to create file {:?}: {}", LATEX_TABLE_FILE, e));
+    writeln!(latex, "{}", latex_table_preamble()).unwrap();
+    for group_result in group_results {
         if BLACKLISTED_GROUPS.iter().any(|&blacklisted| blacklisted == &group_result.name) {
             continue;
         }
@@ -63,16 +81,19 @@ fn main() {
     println!("Full LaTeX table printed to {}", LATEX_TABLE_FILE);
 }
 
-fn latex_name_of_group(group_name: &str) -> &str {
-    match group_name {
-        "salsa20" => "Salsa20 (CT-Wasm), 64 bytes",
-        "sha256 of 64 bytes" => "SHA-256 (CT-Wasm), 64 bytes",
-        "sha256 of 8192 bytes" => "SHA-256 (CT-Wasm), 8192 bytes",
-        "chacha20 of 8192 bytes" => "ChaCha20 (HACL*), 8192 bytes",
-        "poly1305 of 1024 bytes" => "Poly1305 (HACL*), 1024 bytes",
-        "poly1305 of 8192 bytes" => "Poly1305 (HACL*), 8192 bytes",
-        "curve25519_51" => "ECDH Curve25519 (HACL*)",
-        _ => group_name,
+fn latex_name_of_group(group_name: &str) -> String {
+    if let Some(postfix) = group_name.strip_prefix("sha256 of ") {
+        format!("SHA-256 (CT-Wasm), {}", postfix)
+    } else if let Some(postfix) = group_name.strip_prefix("chacha20 of ") {
+        format!("ChaCha20 (HACL*), {}", postfix)
+    } else if let Some(postfix) = group_name.strip_prefix("poly1305 of ") {
+        format!("Poly1305 (HACL*), {}", postfix)
+    } else {
+        match group_name {
+            "salsa20" => "Salsa20 (CT-Wasm), 64 bytes".into(),
+            "curve25519_51" => "ECDH Curve25519 (HACL*)".into(),
+            _ => group_name.into(),
+        }
     }
 }
 
@@ -113,7 +134,16 @@ fn our_group_sort(mut results: HashMap<String, GroupResult>) -> Vec<GroupResult>
 
     insert_if_present("salsa20", &mut results, &mut sorted);
     insert_if_present("sha256 of 64 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 128 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 256 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 512 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 1024 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 2048 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 4096 bytes", &mut results, &mut sorted);
     insert_if_present("sha256 of 8192 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 16384 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 32768 bytes", &mut results, &mut sorted);
+    insert_if_present("sha256 of 65536 bytes", &mut results, &mut sorted);
     insert_if_present("chacha20 of 8192 bytes", &mut results, &mut sorted);
     insert_if_present("poly1305 of 1024 bytes", &mut results, &mut sorted);
     insert_if_present("poly1305 of 8192 bytes", &mut results, &mut sorted);
@@ -129,6 +159,64 @@ fn our_group_sort(mut results: HashMap<String, GroupResult>) -> Vec<GroupResult>
 
 fn first_word(string: &str) -> &str {
     string.split_whitespace().next().unwrap()
+}
+
+fn sha256_scaling_results<'a>(group_results: impl IntoIterator<Item = &'a GroupResult>) {
+    let sha256_groups: BTreeMap<usize, &GroupResult> = group_results
+        .into_iter()
+        .filter_map(|gres| {
+            gres.name.strip_prefix("sha256 of ")
+                .map(|size_str| (size_str.strip_suffix(" bytes").unwrap().parse::<usize>().unwrap(), gres))
+        })
+        .collect();
+    assert!(!sha256_groups.is_empty());
+    let first_group: &GroupResult = sha256_groups.values().next().unwrap();
+    let blade_types = first_group.results.iter().map(|fbr| &fbr.name);
+    let mut json_data = json::object::Object::new();
+
+    let mut sizes = Vec::with_capacity(sha256_groups.len());
+    let mut runtimes_ns = Vec::with_capacity(sha256_groups.len());
+    let mut runtimes_ns_per_byte = Vec::with_capacity(sha256_groups.len());
+    for (size, gres) in &sha256_groups {
+        sizes.push(*size);
+        runtimes_ns.push(gres.ref_value);
+        runtimes_ns_per_byte.push(gres.ref_value / (*size as f64));
+    }
+    json_data.insert("ref", json::object! {
+        sizes: sizes,
+        runtimes_ns: runtimes_ns,
+        runtimes_ns_per_byte: runtimes_ns_per_byte,
+    });
+
+    for blade_type in blade_types {
+        let mut sizes = Vec::with_capacity(sha256_groups.len());
+        let mut runtimes_ns_no_v1_1 = Vec::with_capacity(sha256_groups.len());
+        let mut runtimes_ns_with_v1_1 = Vec::with_capacity(sha256_groups.len());
+        let mut runtimes_ns_per_byte_no_v1_1 = Vec::with_capacity(sha256_groups.len());
+        let mut runtimes_ns_per_byte_with_v1_1 = Vec::with_capacity(sha256_groups.len());
+        for (size, gres) in &sha256_groups {
+            let fbr = gres.results.iter().find(|fbr| &fbr.name == blade_type).unwrap();
+            sizes.push(*size);
+            runtimes_ns_no_v1_1.push(fbr.mean_estimate_no_v1_1);
+            runtimes_ns_with_v1_1.push(fbr.mean_estimate_with_v1_1);
+            runtimes_ns_per_byte_no_v1_1.push(fbr.mean_estimate_no_v1_1 / (*size as f64));
+            runtimes_ns_per_byte_with_v1_1.push(fbr.mean_estimate_with_v1_1 / (*size as f64));
+        }
+        json_data.insert(&format!("{} without v1.1", blade_type), json::object! {
+            sizes: sizes.clone(),
+            runtimes_ns: runtimes_ns_no_v1_1,
+            runtimes_ns_per_byte: runtimes_ns_per_byte_no_v1_1,
+        });
+        json_data.insert(&format!("{} with v1.1", blade_type), json::object! {
+            sizes: sizes,
+            runtimes_ns: runtimes_ns_with_v1_1,
+            runtimes_ns_per_byte: runtimes_ns_per_byte_with_v1_1,
+        });
+    }
+
+    let mut jsonfile = File::create(SHA256_SCALING_JSON_FILE).unwrap_or_else(|e| panic!("Failed to create file {:?}: {}", SHA256_SCALING_JSON_FILE, e));
+    writeln!(jsonfile, "{}", json::stringify_pretty(json_data, 4)).unwrap();
+    println!("JSON for scaling results written to {}", SHA256_SCALING_JSON_FILE);
 }
 
 /// The results for an entire benchmark group, eg "sha256 of 1024 bytes"
@@ -171,6 +259,7 @@ impl GroupResult {
     }
 }
 
+/// Match each no-v1.1 result with the corresponding with-v1.1 result
 fn pair_results(mut results: HashMap<String, f64>) -> HashMap<String, FullBenchmarkResult> {
     let mut paired = HashMap::new();
 
