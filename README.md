@@ -10,7 +10,7 @@ We introduce Blade, a new approach to automatically and efficiently eliminate sp
 
 ## Blade benchmarks
 
-The instructions here should allow you to reproduce Table 1 (Section 7) in that paper.
+The instructions here should allow you to reproduce Table 1 (Section 7) in the paper.
 
 ### Setup
 
