@@ -7,7 +7,7 @@ HACL_STAR=$(HOME)/hacl-star
 LUCETC=$(LUCET_BLADE)/target/debug/lucetc
 LUCETC_FLAGS=--emit=so --guard-size "4GiB" --min-reserved-size "4GiB" --max-reserved-size "4GiB"
 WASI_CLANG=$(WASI_SDK)/bin/clang
-WASI_CLANG_FLAGS=-O3
+WASI_CLANG_FLAGS=-O3 --sysroot=$(WASI_SDK)/share/wasi-sysroot
 WASI_LINK_FLAGS=-nostartfiles -Wl,--no-entry -Wl,--export-all
 WAT2WASM=$(WABT)/wat2wasm
 WASM2WAT=$(WABT)/wasm2wat
